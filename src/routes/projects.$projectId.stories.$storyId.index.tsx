@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Breadcrumb, type BreadcrumbItem } from "@/components/breadcrumb";
-import { SplitEditor } from "@/components/editor/split-editor";
+import { RichTextField } from "@/components/rich-text-field";
 import { StatusIcon, nextStatus } from "@/components/task/task-status";
 import { Timeline } from "@/components/timeline";
 import { cn } from "@/lib/cn";
@@ -172,15 +172,15 @@ function StoryDetail() {
       </header>
 
       <div className="flex flex-col gap-4">
-        <Field label="Description">
-          <SplitEditor
-            value={description}
-            onChange={setDescription}
-            format={descriptionFormat}
-            onFormatChange={setDescriptionFormat}
-            placeholder="Context, goals, references…"
-          />
-        </Field>
+        <RichTextField
+          label="Description"
+          value={description}
+          onChange={setDescription}
+          format={descriptionFormat}
+          onFormatChange={setDescriptionFormat}
+          placeholder="Context, goals, references…"
+          emptyLabel="No description yet — click to add one."
+        />
 
         <TasksSection
           tasks={topLevel}

@@ -1,13 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   BookOpen,
   ChevronRight,
-  Eye,
   FileText,
   LayoutGrid,
   NotebookPen,
-  Pencil,
   Plus,
   Save,
   Trash2,
@@ -15,9 +13,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Breadcrumb, type BreadcrumbItem } from "@/components/breadcrumb";
-import { SplitEditor } from "@/components/editor/split-editor";
+import { RichTextField } from "@/components/rich-text-field";
 import { StatusIcon, nextStatus } from "@/components/task/task-status";
-import { renderField } from "@/lib/render";
 import { cn } from "@/lib/cn";
 import {
   DEADLINE_BORDER,
@@ -66,7 +63,6 @@ function ProjectDetail() {
   const [description, setDescription] = useState("");
   const [descriptionFormat, setDescriptionFormat] =
     useState<TextFormat>("plaintext");
-  const [editingDescription, setEditingDescription] = useState(false);
 
   useEffect(() => {
     if (!project) return;
@@ -74,11 +70,6 @@ function ProjectDetail() {
     setDescription(project.description);
     setDescriptionFormat(project.descriptionFormat);
   }, [project]);
-
-  const renderedDescription = useMemo(
-    () => renderField(description, descriptionFormat),
-    [description, descriptionFormat],
-  );
 
   const items: BreadcrumbItem[] = [
     { label: "Projects", to: "/" },
@@ -177,42 +168,15 @@ function ProjectDetail() {
       </header>
 
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">Description</label>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              onClick={() => setEditingDescription((v) => !v)}
-            >
-              {editingDescription ? <Eye /> : <Pencil />}
-              {editingDescription ? "Preview" : "Edit"}
-            </Button>
-          </div>
-          {editingDescription ? (
-            <SplitEditor
-              value={description}
-              onChange={setDescription}
-              format={descriptionFormat}
-              onFormatChange={setDescriptionFormat}
-              placeholder="Goals, scope, references…"
-            />
-          ) : description.trim() ? (
-            <div
-              className="prose-tasks rounded-md border border-border bg-card/40 p-4"
-              dangerouslySetInnerHTML={{ __html: renderedDescription }}
-            />
-          ) : (
-            <button
-              type="button"
-              onClick={() => setEditingDescription(true)}
-              className="rounded-md border border-dashed border-border p-4 text-center text-xs text-muted-foreground hover:border-border/80 hover:text-foreground"
-            >
-              No description yet — click to add one.
-            </button>
-          )}
-        </div>
+        <RichTextField
+          label="Description"
+          value={description}
+          onChange={setDescription}
+          format={descriptionFormat}
+          onFormatChange={setDescriptionFormat}
+          placeholder="Goals, scope, references…"
+          emptyLabel="No description yet — click to add one."
+        />
 
         <NotesSection
           notes={notes ?? []}

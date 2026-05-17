@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Breadcrumb, type BreadcrumbItem } from "@/components/breadcrumb";
 import { SplitEditor } from "@/components/editor/split-editor";
+import { RichTextField } from "@/components/rich-text-field";
 import { StatusIcon, nextStatus } from "@/components/task/task-status";
 import { Timeline } from "@/components/timeline";
 import { cn } from "@/lib/cn";
@@ -199,15 +200,15 @@ function TaskDetail() {
       </header>
 
       <div className="flex flex-col gap-4">
-        <Field label="Description">
-          <SplitEditor
-            value={description}
-            onChange={setDescription}
-            format={descriptionFormat}
-            onFormatChange={setDescriptionFormat}
-            placeholder="Add context, requirements, references…"
-          />
-        </Field>
+        <RichTextField
+          label="Description"
+          value={description}
+          onChange={setDescription}
+          format={descriptionFormat}
+          onFormatChange={setDescriptionFormat}
+          placeholder="Add context, requirements, references…"
+          emptyLabel="No description yet — click to add one."
+        />
 
         <SubtasksSection
           subtasks={subtasks}
@@ -236,15 +237,15 @@ function TaskDetail() {
           onDelete={(id) => remove.mutate(id)}
         />
 
-        <Field label="Result / notes">
-          <SplitEditor
-            value={result}
-            onChange={setResult}
-            format={resultFormat}
-            onFormatChange={setResultFormat}
-            placeholder="Outcomes, conclusions, follow-ups…"
-          />
-        </Field>
+        <RichTextField
+          label="Result / notes"
+          value={result}
+          onChange={setResult}
+          format={resultFormat}
+          onFormatChange={setResultFormat}
+          placeholder="Outcomes, conclusions, follow-ups…"
+          emptyLabel="No result yet — click to add one."
+        />
 
         <div className="flex flex-wrap gap-4">
           <Field label="Status">
