@@ -15,6 +15,16 @@ use tauri::{Manager, WindowEvent};
 use tokio::sync::Mutex;
 
 pub fn run() {
+    // Force a known dark GTK theme on Linux so the libayatana-appindicator
+    // tray menu doesn't end up with invisible text on themes where it can't
+    // resolve foreground colours. Only set if the user hasn't picked one.
+    #[cfg(target_os = "linux")]
+    {
+        if std::env::var_os("GTK_THEME").is_none() {
+            std::env::set_var("GTK_THEME", "Adwaita:dark");
+        }
+    }
+
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
@@ -60,7 +70,8 @@ pub fn run() {
                 Ok::<_, error::AppError>(())
             })?;
 
-            let show_item = MenuItem::with_id(app, "show", "Show window", true, None::<&str>)?;
+            let show_item =
+                MenuItem::with_id(app, "show", "Show window", true, None::<&str>)?;
             let quit_item = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&show_item, &quit_item])?;
 
@@ -69,7 +80,7 @@ pub fn run() {
                 .ok_or("missing default window icon")?
                 .clone();
 
-            TrayIconBuilder::with_id("main-tray")
+            let tray = TrayIconBuilder::with_id("main-tray")
                 .icon(icon)
                 .tooltip("Organizer")
                 .menu(&menu)
@@ -90,6 +101,9 @@ pub fn run() {
                     }
                 })
                 .build(app)?;
+            // Keep the tray alive for the lifetime of the app so libappindicator
+            // doesn't intermittently lose track of the menu items.
+            app.manage(tray);
 
             if let Some(window) = app.get_webview_window("main") {
                 let window_clone = window.clone();
