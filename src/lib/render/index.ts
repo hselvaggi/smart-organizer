@@ -8,7 +8,7 @@ function escapePlain(s: string): string {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
-  return `<pre class="whitespace-pre-wrap break-words font-sans text-sm leading-relaxed">${escaped}</pre>`;
+  return `<div class="whitespace-pre-wrap break-words">${escaped}</div>`;
 }
 
 export function renderField(value: string, format: TextFormat): string {
