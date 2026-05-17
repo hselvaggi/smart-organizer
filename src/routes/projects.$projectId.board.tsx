@@ -247,7 +247,7 @@ function Column({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex min-w-[220px] flex-col gap-2 rounded-md border border-border bg-card/40 p-2 transition-colors",
+        "flex min-w-[220px] flex-col gap-2 rounded-md border border-border bg-muted/40 p-2 transition-colors",
         isOver && "border-primary/60 bg-primary/5",
       )}
     >
