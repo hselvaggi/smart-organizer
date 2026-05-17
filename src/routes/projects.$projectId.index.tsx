@@ -14,6 +14,12 @@ import { Input } from "@/components/ui/input";
 import { Breadcrumb, type BreadcrumbItem } from "@/components/breadcrumb";
 import { SplitEditor } from "@/components/editor/split-editor";
 import { StatusIcon, nextStatus } from "@/components/task/task-status";
+import { cn } from "@/lib/cn";
+import {
+  DEADLINE_BORDER,
+  getDeadlineStatus,
+  useYellowDays,
+} from "@/lib/deadline";
 import {
   useDeleteProject,
   useProject,
@@ -169,6 +175,7 @@ function ProjectDetail() {
               title: null,
               description: null,
               descriptionFormat: null,
+              dueDate: null,
             })
           }
           onDelete={(id) => removeStory.mutate(id)}
@@ -191,6 +198,7 @@ function StoriesSection({
   onToggle: (s: Story) => void;
   onDelete: (id: string) => void;
 }) {
+  const [yellowDays] = useYellowDays();
   return (
     <section className="flex flex-col gap-2 border-t border-border pt-4">
       <header className="flex items-center justify-between">
@@ -210,7 +218,10 @@ function StoriesSection({
           {stories.map((s) => (
             <li
               key={s.id}
-              className="group flex items-center gap-2 rounded-md border border-border bg-card p-2 transition-colors hover:border-primary/40"
+              className={cn(
+                "group flex items-center gap-2 rounded-md border border-border bg-card p-2 transition-colors hover:border-primary/40",
+                DEADLINE_BORDER[getDeadlineStatus(s.dueDate, s.status, yellowDays)],
+              )}
             >
               <Button
                 type="button"

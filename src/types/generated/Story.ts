@@ -2,4 +2,4 @@
 import type { TaskStatus } from "./TaskStatus";
 import type { TextFormat } from "./TextFormat";
 
-export type Story = { id: string, projectId: string, title: string, description: string, descriptionFormat: TextFormat, status: TaskStatus, sortOrder: number, createdAt: string, updatedAt: string, deletedAt: string | null, };
+export type Story = { id: string, projectId: string, title: string, description: string, descriptionFormat: TextFormat, status: TaskStatus, sortOrder: number, createdAt: string, updatedAt: string, deletedAt: string | null, startedAt: string | null, completedAt: string | null, dueDate: string | null, };

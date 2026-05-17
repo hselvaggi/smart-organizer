@@ -7,7 +7,8 @@ use crate::error::{AppError, AppResult};
 pub async fn list_for_project(pool: &SqlitePool, project_id: &str) -> AppResult<Vec<Story>> {
     let rows = sqlx::query_as::<_, Story>(
         "SELECT id, project_id, title, description, description_format, status,
-                sort_order, created_at, updated_at, deleted_at
+                sort_order, created_at, updated_at, deleted_at,
+                started_at, completed_at, due_date
          FROM stories
          WHERE project_id = ?1 AND deleted_at IS NULL
          ORDER BY sort_order, created_at",
@@ -21,7 +22,8 @@ pub async fn list_for_project(pool: &SqlitePool, project_id: &str) -> AppResult<
 pub async fn get(pool: &SqlitePool, id: &str) -> AppResult<Option<Story>> {
     let row = sqlx::query_as::<_, Story>(
         "SELECT id, project_id, title, description, description_format, status,
-                sort_order, created_at, updated_at, deleted_at
+                sort_order, created_at, updated_at, deleted_at,
+                started_at, completed_at, due_date
          FROM stories
          WHERE id = ?1 AND deleted_at IS NULL",
     )
@@ -91,9 +93,24 @@ pub async fn update(pool: &SqlitePool, input: UpdateStory) -> AppResult<Story> {
             .await?;
     }
     if let Some(status) = input.status {
-        sqlx::query("UPDATE stories SET status = ?2, updated_at = ?3 WHERE id = ?1")
+        sqlx::query(
+            "UPDATE stories SET
+                status = ?2,
+                started_at = CASE WHEN ?2 = 'in_progress' AND started_at IS NULL THEN ?3 ELSE started_at END,
+                completed_at = CASE WHEN ?2 = 'done' AND completed_at IS NULL THEN ?3 ELSE completed_at END,
+                updated_at = ?3
+             WHERE id = ?1",
+        )
+        .bind(&input.id)
+        .bind(status)
+        .bind(&now)
+        .execute(&mut *tx)
+        .await?;
+    }
+    if let Some(due) = input.due_date {
+        sqlx::query("UPDATE stories SET due_date = ?2, updated_at = ?3 WHERE id = ?1")
             .bind(&input.id)
-            .bind(status)
+            .bind(due)
             .bind(&now)
             .execute(&mut *tx)
             .await?;

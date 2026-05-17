@@ -281,6 +281,7 @@ pub static TOOLS: &[ToolDef] = &[
                     ("description", OPT_STR),
                     ("descriptionFormat", TEXT_FORMAT),
                     ("status", STATUS),
+                    ("dueDate", OPT_STR),
                 ],
                 &["id"],
             )
@@ -324,6 +325,7 @@ pub static TOOLS: &[ToolDef] = &[
                     ("resultFormat", TEXT_FORMAT),
                     ("status", STATUS),
                     ("parentTaskId", OPT_STR),
+                    ("dueDate", OPT_STR),
                 ],
                 &["id"],
             )

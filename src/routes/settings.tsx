@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
   Bot,
+  CalendarClock,
   Check,
   Circle,
   Copy,
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useYellowDays } from "@/lib/deadline";
 import {
   Dialog,
   DialogContent,
@@ -37,9 +39,43 @@ function SettingsPage() {
         </p>
       </header>
 
+      <DeadlinesSection />
       <McpSection />
       <DangerZone />
     </div>
+  );
+}
+
+function DeadlinesSection() {
+  const [yellowDays, setYellowDays] = useYellowDays();
+
+  return (
+    <section className="flex max-w-2xl flex-col gap-3 rounded-md border border-border bg-card/40 p-4">
+      <header className="flex items-center gap-2">
+        <CalendarClock size={16} className="text-muted-foreground" />
+        <h3 className="text-sm font-semibold">Deadlines</h3>
+      </header>
+      <p className="text-xs text-muted-foreground">
+        Stories and tasks that are not yet done show a coloured left border on
+        their card based on how close the due date is. Past due is red, within
+        the threshold below is yellow, otherwise green.
+      </p>
+      <label className="flex items-center gap-3">
+        <span className="text-sm">Warn before:</span>
+        <Input
+          type="number"
+          min={0}
+          max={365}
+          value={yellowDays}
+          onChange={(e) => {
+            const v = Number(e.target.value);
+            if (!Number.isNaN(v) && v >= 0) setYellowDays(v);
+          }}
+          className="w-24"
+        />
+        <span className="text-sm text-muted-foreground">day(s) of due date</span>
+      </label>
+    </section>
   );
 }
 

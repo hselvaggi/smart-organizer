@@ -20,6 +20,13 @@ import {
 import { Breadcrumb, type BreadcrumbItem } from "@/components/breadcrumb";
 import { SplitEditor } from "@/components/editor/split-editor";
 import { StatusIcon, nextStatus } from "@/components/task/task-status";
+import { Timeline } from "@/components/timeline";
+import { cn } from "@/lib/cn";
+import {
+  DEADLINE_BORDER,
+  getDeadlineStatus,
+  useYellowDays,
+} from "@/lib/deadline";
 import { useProject } from "@/lib/queries/projects";
 import {
   useDeleteStory,
@@ -67,6 +74,7 @@ function StoryDetail() {
   const [descriptionFormat, setDescriptionFormat] =
     useState<TextFormat>("plaintext");
   const [status, setStatus] = useState<TaskStatus>("todo");
+  const [dueDate, setDueDate] = useState<string>("");
 
   useEffect(() => {
     if (!story) return;
@@ -74,6 +82,7 @@ function StoryDetail() {
     setDescription(story.description);
     setDescriptionFormat(story.descriptionFormat);
     setStatus(story.status);
+    setDueDate(story.dueDate ?? "");
   }, [story]);
 
   const topLevel = (tasks ?? []).filter((t) => !t.parentTaskId);
@@ -100,6 +109,7 @@ function StoryDetail() {
       description,
       descriptionFormat,
       status,
+      dueDate: dueDate || null,
     });
   };
 
@@ -135,6 +145,7 @@ function StoryDetail() {
   return (
     <div className="flex h-full flex-col gap-6 overflow-y-auto p-8">
       <Breadcrumb items={items} />
+      <Timeline startedAt={story.startedAt} completedAt={story.completedAt} />
 
       <header className="flex items-start justify-between gap-4">
         <Input
@@ -192,28 +203,40 @@ function StoryDetail() {
               resultFormat: null,
               parentTaskId: null,
               sortOrder: null,
+              dueDate: null,
             })
           }
           onDelete={(id) => removeTask.mutate(id)}
         />
 
-        <Field label="Status">
-          <Select
-            value={status}
-            onValueChange={(v) => setStatus(v as TaskStatus)}
-          >
-            <SelectTrigger className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUSES.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s.replace("_", " ")}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
+        <div className="flex flex-wrap gap-4">
+          <Field label="Status">
+            <Select
+              value={status}
+              onValueChange={(v) => setStatus(v as TaskStatus)}
+            >
+              <SelectTrigger className="w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s.replace("_", " ")}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+
+          <Field label="Due date">
+            <Input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className="w-48"
+            />
+          </Field>
+        </div>
       </div>
     </div>
   );
@@ -234,6 +257,7 @@ function TasksSection({
   onToggle: (t: Task) => void;
   onDelete: (id: string) => void;
 }) {
+  const [yellowDays] = useYellowDays();
   return (
     <section className="flex flex-col gap-2 border-t border-border pt-4">
       <header className="flex items-center justify-between">
@@ -253,7 +277,10 @@ function TasksSection({
           {tasks.map((t) => (
             <li
               key={t.id}
-              className="group rounded-md border border-border bg-card transition-colors hover:border-primary/40"
+              className={cn(
+                "group rounded-md border border-border bg-card transition-colors hover:border-primary/40",
+                DEADLINE_BORDER[getDeadlineStatus(t.dueDate, t.status, yellowDays)],
+              )}
             >
               <div className="flex items-center gap-2 p-2">
                 <Button

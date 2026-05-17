@@ -7,7 +7,8 @@ use crate::error::{AppError, AppResult};
 pub async fn list_for_story(pool: &SqlitePool, story_id: &str) -> AppResult<Vec<Task>> {
     let rows = sqlx::query_as::<_, Task>(
         "SELECT id, story_id, parent_task_id, title, description, description_format,
-                result, result_format, status, sort_order, created_at, updated_at, deleted_at
+                result, result_format, status, sort_order, created_at, updated_at, deleted_at,
+                started_at, completed_at, due_date
          FROM tasks
          WHERE story_id = ?1 AND deleted_at IS NULL
          ORDER BY sort_order, created_at",
@@ -21,7 +22,8 @@ pub async fn list_for_story(pool: &SqlitePool, story_id: &str) -> AppResult<Vec<
 pub async fn list_for_project(pool: &SqlitePool, project_id: &str) -> AppResult<Vec<Task>> {
     let rows = sqlx::query_as::<_, Task>(
         "SELECT t.id, t.story_id, t.parent_task_id, t.title, t.description, t.description_format,
-                t.result, t.result_format, t.status, t.sort_order, t.created_at, t.updated_at, t.deleted_at
+                t.result, t.result_format, t.status, t.sort_order, t.created_at, t.updated_at, t.deleted_at,
+                t.started_at, t.completed_at, t.due_date
          FROM tasks t
          JOIN stories s ON t.story_id = s.id
          WHERE s.project_id = ?1 AND t.deleted_at IS NULL AND s.deleted_at IS NULL
@@ -36,7 +38,8 @@ pub async fn list_for_project(pool: &SqlitePool, project_id: &str) -> AppResult<
 pub async fn get(pool: &SqlitePool, id: &str) -> AppResult<Option<Task>> {
     let row = sqlx::query_as::<_, Task>(
         "SELECT id, story_id, parent_task_id, title, description, description_format,
-                result, result_format, status, sort_order, created_at, updated_at, deleted_at
+                result, result_format, status, sort_order, created_at, updated_at, deleted_at,
+                started_at, completed_at, due_date
          FROM tasks
          WHERE id = ?1 AND deleted_at IS NULL",
     )
@@ -125,12 +128,19 @@ pub async fn update(pool: &SqlitePool, input: UpdateTask) -> AppResult<Task> {
             .await?;
     }
     if let Some(status) = input.status {
-        sqlx::query("UPDATE tasks SET status = ?2, updated_at = ?3 WHERE id = ?1")
-            .bind(&input.id)
-            .bind(status)
-            .bind(&now)
-            .execute(&mut *tx)
-            .await?;
+        sqlx::query(
+            "UPDATE tasks SET
+                status = ?2,
+                started_at = CASE WHEN ?2 = 'in_progress' AND started_at IS NULL THEN ?3 ELSE started_at END,
+                completed_at = CASE WHEN ?2 = 'done' AND completed_at IS NULL THEN ?3 ELSE completed_at END,
+                updated_at = ?3
+             WHERE id = ?1",
+        )
+        .bind(&input.id)
+        .bind(status)
+        .bind(&now)
+        .execute(&mut *tx)
+        .await?;
     }
     if let Some(parent) = input.parent_task_id {
         sqlx::query("UPDATE tasks SET parent_task_id = ?2, updated_at = ?3 WHERE id = ?1")
@@ -144,6 +154,14 @@ pub async fn update(pool: &SqlitePool, input: UpdateTask) -> AppResult<Task> {
         sqlx::query("UPDATE tasks SET sort_order = ?2, updated_at = ?3 WHERE id = ?1")
             .bind(&input.id)
             .bind(order)
+            .bind(&now)
+            .execute(&mut *tx)
+            .await?;
+    }
+    if let Some(due) = input.due_date {
+        sqlx::query("UPDATE tasks SET due_date = ?2, updated_at = ?3 WHERE id = ?1")
+            .bind(&input.id)
+            .bind(due)
             .bind(&now)
             .execute(&mut *tx)
             .await?;

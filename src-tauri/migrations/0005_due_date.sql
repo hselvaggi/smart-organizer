@@ -1,0 +1,2 @@
+ALTER TABLE stories ADD COLUMN due_date TEXT;
+ALTER TABLE tasks ADD COLUMN due_date TEXT;

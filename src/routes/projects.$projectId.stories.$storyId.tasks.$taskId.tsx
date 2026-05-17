@@ -19,6 +19,13 @@ import {
 import { Breadcrumb, type BreadcrumbItem } from "@/components/breadcrumb";
 import { SplitEditor } from "@/components/editor/split-editor";
 import { StatusIcon, nextStatus } from "@/components/task/task-status";
+import { Timeline } from "@/components/timeline";
+import { cn } from "@/lib/cn";
+import {
+  DEADLINE_BORDER,
+  getDeadlineStatus,
+  useYellowDays,
+} from "@/lib/deadline";
 import { useProject } from "@/lib/queries/projects";
 import { useStory } from "@/lib/queries/stories";
 import {
@@ -75,6 +82,7 @@ function TaskDetail() {
   const [result, setResult] = useState("");
   const [resultFormat, setResultFormat] = useState<TextFormat>("plaintext");
   const [status, setStatus] = useState<TaskStatus>("todo");
+  const [dueDate, setDueDate] = useState<string>("");
 
   useEffect(() => {
     if (!task) return;
@@ -84,6 +92,7 @@ function TaskDetail() {
     setResult(task.result);
     setResultFormat(task.resultFormat);
     setStatus(task.status);
+    setDueDate(task.dueDate ?? "");
   }, [task]);
 
   const ancestors = task ? ancestorTasks(task, storyTasks ?? []) : [];
@@ -123,6 +132,7 @@ function TaskDetail() {
       status,
       parentTaskId: null,
       sortOrder: null,
+      dueDate: dueDate || null,
     });
   };
 
@@ -162,6 +172,7 @@ function TaskDetail() {
   return (
     <div className="flex h-full flex-col gap-6 overflow-y-auto p-8">
       <Breadcrumb items={items} />
+      <Timeline startedAt={task.startedAt} completedAt={task.completedAt} />
 
       <header className="flex items-start justify-between gap-4">
         <Input
@@ -219,6 +230,7 @@ function TaskDetail() {
               resultFormat: null,
               parentTaskId: null,
               sortOrder: null,
+              dueDate: null,
             })
           }
           onDelete={(id) => remove.mutate(id)}
@@ -234,23 +246,34 @@ function TaskDetail() {
           />
         </Field>
 
-        <Field label="Status">
-          <Select
-            value={status}
-            onValueChange={(v) => setStatus(v as TaskStatus)}
-          >
-            <SelectTrigger className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUSES.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s.replace("_", " ")}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
+        <div className="flex flex-wrap gap-4">
+          <Field label="Status">
+            <Select
+              value={status}
+              onValueChange={(v) => setStatus(v as TaskStatus)}
+            >
+              <SelectTrigger className="w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s.replace("_", " ")}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+
+          <Field label="Due date">
+            <Input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className="w-48"
+            />
+          </Field>
+        </div>
 
         <CommentsSection taskId={taskId} />
       </div>
@@ -371,6 +394,7 @@ function SubtasksSection({
   onToggle: (t: Task) => void;
   onDelete: (id: string) => void;
 }) {
+  const [yellowDays] = useYellowDays();
   const childCount = (id: string) =>
     storyTasks.filter((t) => t.parentTaskId === id).length;
 
@@ -393,7 +417,10 @@ function SubtasksSection({
           {subtasks.map((s) => (
             <li
               key={s.id}
-              className="group flex items-center gap-2 rounded-md border border-border bg-background p-2"
+              className={cn(
+                "group flex items-center gap-2 rounded-md border border-border bg-background p-2",
+                DEADLINE_BORDER[getDeadlineStatus(s.dueDate, s.status, yellowDays)],
+              )}
             >
               <Button
                 type="button"

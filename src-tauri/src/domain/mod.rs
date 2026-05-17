@@ -68,6 +68,9 @@ pub struct Story {
     pub created_at: String,
     pub updated_at: String,
     pub deleted_at: Option<String>,
+    pub started_at: Option<String>,
+    pub completed_at: Option<String>,
+    pub due_date: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS, sqlx::FromRow)]
@@ -88,6 +91,9 @@ pub struct Task {
     pub created_at: String,
     pub updated_at: String,
     pub deleted_at: Option<String>,
+    pub started_at: Option<String>,
+    pub completed_at: Option<String>,
+    pub due_date: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS, sqlx::FromRow)]
@@ -169,6 +175,7 @@ pub struct UpdateStory {
     pub description: Option<String>,
     pub description_format: Option<TextFormat>,
     pub status: Option<TaskStatus>,
+    pub due_date: Option<Option<String>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -209,4 +216,5 @@ pub struct UpdateTask {
     pub parent_task_id: Option<Option<String>>,
     #[ts(type = "number | null")]
     pub sort_order: Option<i64>,
+    pub due_date: Option<Option<String>>,
 }

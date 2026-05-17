@@ -17,6 +17,11 @@ import { Breadcrumb, type BreadcrumbItem } from "@/components/breadcrumb";
 import { StatusIcon, nextStatus } from "@/components/task/task-status";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
+import {
+  DEADLINE_BORDER,
+  getDeadlineStatus,
+  useYellowDays,
+} from "@/lib/deadline";
 import { useProject } from "@/lib/queries/projects";
 import { useUpdateStory } from "@/lib/queries/stories";
 import { useUpdateTask } from "@/lib/queries/tasks";
@@ -80,6 +85,7 @@ function ProjectBoard() {
           title: null,
           description: null,
           descriptionFormat: null,
+          dueDate: null,
         },
         {
           onSuccess: () =>
@@ -98,6 +104,7 @@ function ProjectBoard() {
           resultFormat: null,
           parentTaskId: null,
           sortOrder: null,
+          dueDate: null,
         },
         {
           onSuccess: () =>
@@ -153,6 +160,7 @@ function ProjectBoard() {
         title: null,
         description: null,
         descriptionFormat: null,
+        dueDate: null,
       });
     } else {
       updateTask.mutate({
@@ -165,6 +173,7 @@ function ProjectBoard() {
         resultFormat: null,
         parentTaskId: null,
         sortOrder: null,
+        dueDate: null,
       });
     }
   };
@@ -289,11 +298,15 @@ function CardItem({
     data: { card },
   });
 
+  const [yellowDays] = useYellowDays();
+  const deadline = getDeadlineStatus(item.dueDate, item.status, yellowDays);
+
   return (
     <li
       ref={setNodeRef}
       className={cn(
         "rounded-md border border-border bg-background p-2 transition-colors hover:border-primary/40",
+        DEADLINE_BORDER[deadline],
         isDragging && "opacity-30",
       )}
     >
@@ -351,8 +364,16 @@ function CardPreview({ card }: { card: Card }) {
     .trim()
     .slice(0, 260);
 
+  const [yellowDays] = useYellowDays();
+  const deadline = getDeadlineStatus(item.dueDate, item.status, yellowDays);
+
   return (
-    <div className="w-[200px] cursor-grabbing rounded-md border border-primary/60 bg-background p-2 shadow-2xl">
+    <div
+      className={cn(
+        "w-[200px] cursor-grabbing rounded-md border border-primary/60 bg-background p-2 shadow-2xl",
+        DEADLINE_BORDER[deadline],
+      )}
+    >
       <div className="flex items-start gap-2">
         <span className="flex h-9 w-9 items-center justify-center">
           <StatusIcon status={item.status} />
