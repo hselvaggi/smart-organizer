@@ -3,10 +3,14 @@ mod config;
 mod db;
 mod domain;
 mod error;
+mod mcp;
 mod state;
 
-use state::AppState;
+use std::sync::Arc;
+
+use state::{AppState, McpState};
 use tauri::Manager;
+use tokio::sync::Mutex;
 
 pub fn run() {
     tracing_subscriber::fmt()
@@ -31,7 +35,26 @@ pub fn run() {
                 let db_path = config::db_path(&handle)?;
                 tracing::info!(?db_path, "opening database");
                 let pool = db::open_pool(&db_path).await?;
-                handle.manage(AppState { db: pool });
+
+                let mcp_state = Arc::new(Mutex::new(McpState::default()));
+                let saved_mode = mcp::load_mode(&data_dir);
+                if saved_mode.is_running() {
+                    if let Err(e) = mcp::start(
+                        mcp_state.clone(),
+                        pool.clone(),
+                        saved_mode,
+                        mcp::DEFAULT_PORT,
+                    )
+                    .await
+                    {
+                        tracing::warn!(error = %e, "could not auto-start mcp");
+                    }
+                }
+
+                handle.manage(AppState {
+                    db: pool,
+                    mcp: mcp_state,
+                });
                 Ok::<_, error::AppError>(())
             })?;
             Ok(())
@@ -58,6 +81,9 @@ pub fn run() {
             commands::comments::create_comment,
             commands::comments::delete_comment,
             commands::system::get_system_info,
+            commands::system::reset_database,
+            commands::system::get_mcp_status,
+            commands::system::set_mcp_mode,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

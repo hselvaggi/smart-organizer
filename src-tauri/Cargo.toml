@@ -55,6 +55,10 @@ rustls-pki-types = "1"
 
 ts-rs = { version = "10", features = ["serde-compat", "uuid-impl"] }
 
+axum = "0.7"
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors"] }
+
 [features]
 default = ["custom-protocol"]
 custom-protocol = ["tauri/custom-protocol"]
