@@ -1,5 +1,11 @@
 import { Outlet, Link, createRootRoute } from "@tanstack/react-router";
-import { FolderKanban, Info, Settings2, Cpu } from "lucide-react";
+import {
+  Cpu,
+  FolderKanban,
+  Info,
+  NotebookPen,
+  Settings2,
+} from "lucide-react";
 import { ResizeHandles } from "@/components/resize-handles";
 import { TitleBar } from "@/components/title-bar";
 import { cn } from "@/lib/cn";
@@ -34,6 +40,11 @@ function RootLayout() {
             </p>
           </div>
           <NavItem to="/" icon={<FolderKanban size={16} />} label="Projects" />
+          <NavItem
+            to="/notes"
+            icon={<NotebookPen size={16} />}
+            label="Notes"
+          />
           <NavItem
             to="/system-check"
             icon={<Cpu size={16} />}

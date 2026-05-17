@@ -5,6 +5,7 @@ import {
   ChevronRight,
   FileText,
   LayoutGrid,
+  NotebookPen,
   Plus,
   Save,
   Trash2,
@@ -31,7 +32,12 @@ import {
   useStories,
   useUpdateStory,
 } from "@/lib/queries/stories";
-import type { Story, TextFormat } from "@/types/generated";
+import {
+  useCreateNote,
+  useDeleteNote,
+  useNotesForProject,
+} from "@/lib/queries/notes";
+import type { Note, Story, TextFormat } from "@/types/generated";
 
 export const Route = createFileRoute("/projects/$projectId/")({
   component: ProjectDetail,
@@ -43,12 +49,15 @@ function ProjectDetail() {
 
   const { data: project } = useProject(projectId);
   const { data: stories } = useStories(projectId);
+  const { data: notes } = useNotesForProject(projectId);
 
   const update = useUpdateProject();
   const removeProject = useDeleteProject();
   const createStory = useCreateStory(projectId);
   const updateStory = useUpdateStory(projectId);
   const removeStory = useDeleteStory(projectId);
+  const createNote = useCreateNote();
+  const removeNote = useDeleteNote();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -96,6 +105,16 @@ function ProjectDetail() {
       to: "/projects/$projectId/stories/$storyId",
       params: { projectId, storyId: created.id },
     });
+  };
+
+  const handleAddNote = async () => {
+    const created = await createNote.mutateAsync({
+      projectId,
+      title: "Untitled note",
+      body: "",
+      bodyFormat: "plaintext",
+    });
+    navigate({ to: "/notes/$noteId", params: { noteId: created.id } });
   };
 
   if (!project) {
@@ -158,6 +177,13 @@ function ProjectDetail() {
             placeholder="Goals, scope, references…"
           />
         </Field>
+
+        <NotesSection
+          notes={notes ?? []}
+          onOpen={(id) => navigate({ to: "/notes/$noteId", params: { noteId: id } })}
+          onAdd={handleAddNote}
+          onDelete={(id) => removeNote.mutate(id)}
+        />
 
         <StoriesSection
           stories={stories ?? []}
@@ -267,6 +293,79 @@ function StoriesSection({
               </Button>
             </li>
           ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function NotesSection({
+  notes,
+  onOpen,
+  onAdd,
+  onDelete,
+}: {
+  notes: Note[];
+  onOpen: (id: string) => void;
+  onAdd: () => void;
+  onDelete: (id: string) => void;
+}) {
+  return (
+    <section className="flex flex-col gap-2 border-t border-border pt-4">
+      <header className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold">Notes</h3>
+        <Button type="button" size="sm" variant="outline" onClick={onAdd}>
+          <Plus />
+          Add note
+        </Button>
+      </header>
+
+      {notes.length === 0 ? (
+        <p className="rounded-md border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
+          No notes attached to this project yet.
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-1">
+          {notes.map((n) => {
+            const preview = n.body.replace(/\s+/g, " ").trim().slice(0, 140);
+            return (
+              <li
+                key={n.id}
+                className="group flex items-center gap-2 rounded-md border border-border bg-card p-2 transition-colors hover:border-primary/40"
+              >
+                <button
+                  type="button"
+                  onClick={() => onOpen(n.id)}
+                  className="flex flex-1 flex-col gap-0.5 text-left"
+                >
+                  <div className="flex items-center gap-2 text-sm">
+                    <NotebookPen size={14} className="text-muted-foreground" />
+                    <span className="font-medium">{n.title}</span>
+                    <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
+                      Open
+                      <ChevronRight size={12} />
+                    </span>
+                  </div>
+                  {preview && (
+                    <p className="line-clamp-2 text-xs text-muted-foreground">
+                      {preview}
+                      {n.body.length > 140 ? "…" : ""}
+                    </p>
+                  )}
+                </button>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className="opacity-0 transition-opacity group-hover:opacity-100"
+                  onClick={() => onDelete(n.id)}
+                  aria-label="Delete note"
+                >
+                  <Trash2 />
+                </Button>
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>

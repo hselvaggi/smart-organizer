@@ -1,4 +1,5 @@
 pub mod comments;
+pub mod notes;
 pub mod projects;
 pub mod stories;
 pub mod system;

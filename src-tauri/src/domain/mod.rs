@@ -99,6 +99,45 @@ pub struct Task {
 #[derive(Debug, Clone, Serialize, Deserialize, TS, sqlx::FromRow)]
 #[ts(export, export_to = "../../src/types/generated/")]
 #[serde(rename_all = "camelCase")]
+pub struct Note {
+    pub id: String,
+    pub project_id: Option<String>,
+    pub title: String,
+    pub body: String,
+    pub body_format: TextFormat,
+    #[ts(type = "number")]
+    pub sort_order: i64,
+    pub created_at: String,
+    pub updated_at: String,
+    pub deleted_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/generated/")]
+#[serde(rename_all = "camelCase")]
+pub struct NewNote {
+    pub title: String,
+    #[serde(default)]
+    pub project_id: Option<String>,
+    #[serde(default)]
+    pub body: String,
+    #[serde(default)]
+    pub body_format: TextFormat,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/generated/")]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateNote {
+    pub id: String,
+    pub title: Option<String>,
+    pub body: Option<String>,
+    pub body_format: Option<TextFormat>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS, sqlx::FromRow)]
+#[ts(export, export_to = "../../src/types/generated/")]
+#[serde(rename_all = "camelCase")]
 pub struct Comment {
     pub id: String,
     pub task_id: String,

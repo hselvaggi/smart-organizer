@@ -31,10 +31,8 @@ function AboutPage() {
           )}
         </div>
         <p className="text-sm text-muted-foreground">
-          A local-first hierarchical work tracker: projects → stories →
-          tasks → subtasks at any depth, with markdown/LaTeX rendering,
-          deadlines, a kanban board, and an opt-in MCP server so AI agents
-          can read and update your data.
+          A simple tool that helps organize tasks, projects and helps to
+          keep track of things with notes.
         </p>
 
         <dl className="grid grid-cols-[max-content_1fr] gap-x-6 gap-y-2 text-sm">

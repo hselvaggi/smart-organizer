@@ -4,14 +4,17 @@ import type {
   McpMode,
   McpStatus,
   NewComment,
+  NewNote,
   NewProject,
   NewStory,
   NewTask,
+  Note,
   Project,
   ProjectBoard,
   Story,
   SystemInfo,
   Task,
+  UpdateNote,
   UpdateProject,
   UpdateStory,
   UpdateTask,
@@ -46,6 +49,14 @@ export const api = {
   createComment: (input: NewComment) =>
     invoke<Comment>("create_comment", { input }),
   deleteComment: (id: string) => invoke<void>("delete_comment", { id }),
+
+  listNotes: () => invoke<Note[]>("list_notes"),
+  listNotesForProject: (projectId: string) =>
+    invoke<Note[]>("list_notes_for_project", { projectId }),
+  getNote: (id: string) => invoke<Note | null>("get_note", { id }),
+  createNote: (input: NewNote) => invoke<Note>("create_note", { input }),
+  updateNote: (input: UpdateNote) => invoke<Note>("update_note", { input }),
+  deleteNote: (id: string) => invoke<void>("delete_note", { id }),
 
   getSystemInfo: () => invoke<SystemInfo>("get_system_info"),
   resetDatabase: () => invoke<void>("reset_database"),

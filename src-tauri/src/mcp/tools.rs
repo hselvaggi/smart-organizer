@@ -3,7 +3,8 @@ use sqlx::SqlitePool;
 
 use crate::db;
 use crate::domain::{
-    NewComment, NewProject, NewStory, NewTask, UpdateProject, UpdateStory, UpdateTask,
+    NewComment, NewNote, NewProject, NewStory, NewTask, UpdateNote, UpdateProject, UpdateStory,
+    UpdateTask,
 };
 use crate::error::AppResult;
 use crate::state::McpMode;
@@ -69,6 +70,17 @@ pub async fn call_tool(
                 .await
                 .map(|v| json!(v))
         }
+        "list_notes" => db::notes::list_standalone(pool).await.map(|v| json!(v)),
+        "list_notes_for_project" => {
+            let project_id = str_arg(args, "projectId")?;
+            db::notes::list_for_project(pool, project_id)
+                .await
+                .map(|v| json!(v))
+        }
+        "get_note" => {
+            let id = str_arg(args, "id")?;
+            db::notes::get(pool, id).await.map(|v| json!(v))
+        }
         "get_project_board" => {
             let project_id = str_arg(args, "projectId")?;
             let stories = db::stories::list_for_project(pool, project_id).await;
@@ -128,6 +140,20 @@ pub async fn call_tool(
         "delete_comment" => {
             let id = str_arg(args, "id")?;
             db::comments::soft_delete(pool, id)
+                .await
+                .map(|_| json!({ "ok": true }))
+        }
+        "create_note" => {
+            let input: NewNote = parse_arg(args)?;
+            db::notes::create(pool, input).await.map(|v| json!(v))
+        }
+        "update_note" => {
+            let input: UpdateNote = parse_arg(args)?;
+            db::notes::update(pool, input).await.map(|v| json!(v))
+        }
+        "delete_note" => {
+            let id = str_arg(args, "id")?;
+            db::notes::soft_delete(pool, id)
                 .await
                 .map(|_| json!({ "ok": true }))
         }
@@ -356,6 +382,63 @@ pub static TOOLS: &[ToolDef] = &[
     ToolDef {
         name: "delete_comment",
         description: "Soft-delete a comment",
+        input_schema: || schema(&[("id", STR)], &["id"]),
+        writes: true,
+    },
+    // notes (can be standalone or attached to a project)
+    ToolDef {
+        name: "list_notes",
+        description: "List standalone notes (not attached to any project), newest first",
+        input_schema: || schema(&[], &[]),
+        writes: false,
+    },
+    ToolDef {
+        name: "list_notes_for_project",
+        description: "List notes attached to a specific project, newest first",
+        input_schema: || schema(&[("projectId", STR)], &["projectId"]),
+        writes: false,
+    },
+    ToolDef {
+        name: "get_note",
+        description: "Get a note by id",
+        input_schema: || schema(&[("id", STR)], &["id"]),
+        writes: false,
+    },
+    ToolDef {
+        name: "create_note",
+        description: "Create a new note. Pass projectId to attach it to a project; omit for standalone",
+        input_schema: || {
+            schema(
+                &[
+                    ("title", STR),
+                    ("body", STR),
+                    ("bodyFormat", TEXT_FORMAT),
+                    ("projectId", OPT_STR),
+                ],
+                &["title"],
+            )
+        },
+        writes: true,
+    },
+    ToolDef {
+        name: "update_note",
+        description: "Update a note (only provided fields are changed)",
+        input_schema: || {
+            schema(
+                &[
+                    ("id", STR),
+                    ("title", OPT_STR),
+                    ("body", OPT_STR),
+                    ("bodyFormat", TEXT_FORMAT),
+                ],
+                &["id"],
+            )
+        },
+        writes: true,
+    },
+    ToolDef {
+        name: "delete_note",
+        description: "Soft-delete a note",
         input_schema: || schema(&[("id", STR)], &["id"]),
         writes: true,
     },
