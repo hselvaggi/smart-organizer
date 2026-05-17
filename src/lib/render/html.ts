@@ -1,0 +1,42 @@
+import DOMPurify from "dompurify";
+
+export function renderHtml(source: string): string {
+  return DOMPurify.sanitize(source, {
+    ALLOWED_TAGS: [
+      "a",
+      "b",
+      "blockquote",
+      "br",
+      "code",
+      "div",
+      "em",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "hr",
+      "i",
+      "img",
+      "li",
+      "ol",
+      "p",
+      "pre",
+      "span",
+      "strong",
+      "sub",
+      "sup",
+      "table",
+      "tbody",
+      "td",
+      "th",
+      "thead",
+      "tr",
+      "u",
+      "ul",
+    ],
+    ALLOWED_ATTR: ["href", "src", "alt", "title", "class", "target", "rel"],
+    FORBID_ATTR: ["style", "onerror", "onload", "onclick"],
+  });
+}

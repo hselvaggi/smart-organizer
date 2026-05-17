@@ -1,0 +1,35 @@
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Build caches
+.tanstack/
+tsconfig.tsbuildinfo
+
+# Screenshots / scratch
+*.png
+resume.txt
+
+# Rust / Tauri
+src-tauri/target/
+src-tauri/gen/
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+pnpm-debug.log*
+
+# Env
+.env
+.env.local
+
+# TanStack Router generated
+src/routeTree.gen.ts

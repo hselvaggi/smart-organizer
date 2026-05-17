@@ -1,0 +1,61 @@
+[package]
+name = "tasks"
+version = "0.1.0"
+description = "Local-first task manager with LAN P2P sync"
+edition = "2021"
+rust-version = "1.77"
+
+[lib]
+name = "tasks_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-shell = "2"
+tauri-plugin-os = "2"
+tauri-plugin-clipboard-manager = "2"
+tauri-plugin-store = "2"
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+tokio = { version = "1", features = ["full"] }
+
+sqlx = { version = "0.8", default-features = false, features = [
+    "runtime-tokio-rustls",
+    "sqlite",
+    "macros",
+    "migrate",
+    "uuid",
+] }
+
+uuid = { version = "1", features = ["v7", "serde"] }
+time = { version = "0.3", features = ["serde", "formatting", "parsing", "macros"] }
+
+thiserror = "1"
+anyhow = "1"
+
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+which = "7"
+
+mdns-sd = "0.13"
+
+quinn = { version = "0.11", default-features = false, features = ["runtime-tokio", "rustls"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std"] }
+rcgen = "0.13"
+ring = "0.17"
+rustls-pki-types = "1"
+
+ts-rs = { version = "10", features = ["serde-compat", "uuid-impl"] }
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+generate-types = []

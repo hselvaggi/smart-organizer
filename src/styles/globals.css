@@ -1,0 +1,142 @@
+@import "katex/dist/katex.min.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 234 89% 63%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 234 89% 63%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222 26% 8%;
+    --foreground: 210 20% 96%;
+
+    --card: 222 24% 11%;
+    --card-foreground: 210 20% 96%;
+
+    --popover: 222 26% 9%;
+    --popover-foreground: 210 20% 96%;
+
+    --primary: 234 89% 70%;
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 217 19% 18%;
+    --secondary-foreground: 210 20% 96%;
+
+    --muted: 217 19% 16%;
+    --muted-foreground: 215 16% 65%;
+
+    --accent: 217 19% 20%;
+    --accent-foreground: 210 20% 96%;
+
+    --destructive: 0 72% 56%;
+    --destructive-foreground: 210 20% 96%;
+
+    --border: 217 19% 18%;
+    --input: 217 19% 18%;
+    --ring: 234 89% 70%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html, body, #root {
+    @apply h-full;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    @apply bg-primary/30;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted rounded;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/40;
+  }
+}
+
+@layer components {
+  .prose-tasks {
+    @apply text-sm leading-relaxed text-foreground;
+  }
+  .prose-tasks h1 { @apply mb-2 mt-4 text-xl font-semibold; }
+  .prose-tasks h2 { @apply mb-2 mt-4 text-lg font-semibold; }
+  .prose-tasks h3 { @apply mb-1 mt-3 text-base font-semibold; }
+  .prose-tasks h4 { @apply mb-1 mt-2 text-sm font-semibold; }
+  .prose-tasks p { @apply my-2; }
+  .prose-tasks ul { @apply my-2 list-disc pl-6; }
+  .prose-tasks ol { @apply my-2 list-decimal pl-6; }
+  .prose-tasks li { @apply my-0.5; }
+  .prose-tasks a { @apply text-primary underline-offset-2 hover:underline; }
+  .prose-tasks blockquote {
+    @apply my-2 border-l-2 border-border pl-3 italic text-muted-foreground;
+  }
+  .prose-tasks code {
+    @apply rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em];
+  }
+  .prose-tasks pre {
+    @apply my-2 overflow-x-auto rounded-md border border-border bg-muted/40 p-3;
+  }
+  .prose-tasks pre code {
+    @apply bg-transparent p-0;
+  }
+  .prose-tasks hr { @apply my-4 border-border; }
+  .prose-tasks table {
+    @apply my-2 w-full border-collapse text-left;
+  }
+  .prose-tasks th, .prose-tasks td {
+    @apply border border-border px-2 py-1;
+  }
+  .prose-tasks th { @apply bg-muted/50 font-semibold; }
+  .prose-tasks img { @apply my-2 max-w-full rounded; }
+  .prose-tasks .katex-display {
+    @apply my-3 overflow-x-auto;
+  }
+}
