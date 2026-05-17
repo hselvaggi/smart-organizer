@@ -247,11 +247,11 @@ function Column({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex min-w-[220px] flex-col gap-2 rounded-md border border-border bg-muted/40 p-2 transition-colors",
+        "flex min-w-[220px] flex-col overflow-hidden rounded-md border border-border bg-muted/40 transition-colors",
         isOver && "border-primary/60 bg-primary/5",
       )}
     >
-      <header className="flex items-center gap-2 px-1">
+      <header className="flex items-center gap-2 border-b border-border bg-muted/70 px-3 py-2">
         <StatusIcon status={status} />
         <h3 className="text-sm font-semibold">{label}</h3>
         <span className="ml-auto rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
@@ -259,7 +259,7 @@ function Column({
         </span>
       </header>
 
-      <ul className="flex flex-1 flex-col gap-2 overflow-y-auto">
+      <ul className="flex flex-1 flex-col gap-2 overflow-y-auto p-2">
         {cards.map((c) => (
           <CardItem
             key={`${c.kind}-${c.item.id}`}
