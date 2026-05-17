@@ -282,7 +282,7 @@ function CardItem({
   const preview = item.description
     .replace(/\s+/g, " ")
     .trim()
-    .slice(0, 120);
+    .slice(0, 260);
 
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `${card.kind}-${card.item.id}`,
@@ -328,9 +328,9 @@ function CardItem({
             {item.title}
           </span>
           {preview && (
-            <p className="text-xs text-muted-foreground line-clamp-2">
+            <p className="whitespace-pre-line text-xs text-muted-foreground line-clamp-5">
               {preview}
-              {item.description.length > 120 ? "…" : ""}
+              {item.description.length > 260 ? "…" : ""}
             </p>
           )}
         </button>
@@ -349,7 +349,7 @@ function CardPreview({ card }: { card: Card }) {
   const preview = item.description
     .replace(/\s+/g, " ")
     .trim()
-    .slice(0, 120);
+    .slice(0, 260);
 
   return (
     <div className="w-[200px] cursor-grabbing rounded-md border border-primary/60 bg-background p-2 shadow-2xl">
@@ -372,9 +372,9 @@ function CardPreview({ card }: { card: Card }) {
             {item.title}
           </span>
           {preview && (
-            <p className="text-xs text-muted-foreground line-clamp-2">
+            <p className="whitespace-pre-line text-xs text-muted-foreground line-clamp-5">
               {preview}
-              {item.description.length > 120 ? "…" : ""}
+              {item.description.length > 260 ? "…" : ""}
             </p>
           )}
         </div>
