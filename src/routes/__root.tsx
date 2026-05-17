@@ -1,5 +1,5 @@
 import { Outlet, Link, createRootRoute } from "@tanstack/react-router";
-import { FolderKanban, Settings2, Cpu } from "lucide-react";
+import { FolderKanban, Info, Settings2, Cpu } from "lucide-react";
 import { ResizeHandles } from "@/components/resize-handles";
 import { TitleBar } from "@/components/title-bar";
 import { cn } from "@/lib/cn";
@@ -28,7 +28,7 @@ function RootLayout() {
           )}
         >
           <div className="px-2 pb-3 pt-1">
-            <h1 className="text-sm font-semibold tracking-tight">Tasks</h1>
+            <h1 className="text-sm font-semibold tracking-tight">Organizer</h1>
             <p className="text-xs text-muted-foreground">
               Local-first work tracker
             </p>
@@ -44,6 +44,7 @@ function RootLayout() {
             icon={<Settings2 size={16} />}
             label="Settings"
           />
+          <NavItem to="/about" icon={<Info size={16} />} label="About" />
         </aside>
         <main className="overflow-auto">
           <Outlet />

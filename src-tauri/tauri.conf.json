@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Tasks",
+  "productName": "Organizer",
   "version": "0.1.0",
   "identifier": "dev.harold.tasks",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Tasks",
+        "title": "Organizer",
         "width": 1280,
         "height": 800,
         "minWidth": 900,
