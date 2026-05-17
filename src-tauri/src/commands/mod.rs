@@ -1,6 +1,7 @@
 pub mod comments;
 pub mod projects;
 pub mod stories;
+pub mod system;
 pub mod tasks;
 
 use crate::error::AppResult;

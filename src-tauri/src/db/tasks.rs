@@ -18,6 +18,21 @@ pub async fn list_for_story(pool: &SqlitePool, story_id: &str) -> AppResult<Vec<
     Ok(rows)
 }
 
+pub async fn list_for_project(pool: &SqlitePool, project_id: &str) -> AppResult<Vec<Task>> {
+    let rows = sqlx::query_as::<_, Task>(
+        "SELECT t.id, t.story_id, t.parent_task_id, t.title, t.description, t.description_format,
+                t.result, t.result_format, t.status, t.sort_order, t.created_at, t.updated_at, t.deleted_at
+         FROM tasks t
+         JOIN stories s ON t.story_id = s.id
+         WHERE s.project_id = ?1 AND t.deleted_at IS NULL AND s.deleted_at IS NULL
+         ORDER BY t.sort_order, t.created_at",
+    )
+    .bind(project_id)
+    .fetch_all(pool)
+    .await?;
+    Ok(rows)
+}
+
 pub async fn get(pool: &SqlitePool, id: &str) -> AppResult<Option<Task>> {
     let row = sqlx::query_as::<_, Task>(
         "SELECT id, story_id, parent_task_id, title, description, description_format,

@@ -1,25 +1,18 @@
-import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   ChevronRight,
   FileText,
   FolderKanban,
-  Pencil,
   Plus,
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ProjectDialog } from "@/components/project/project-dialog";
 import {
+  useCreateProject,
   useDeleteProject,
   useProjects,
 } from "@/lib/queries/projects";
 import type { Project } from "@/types/generated";
-
-type DialogState =
-  | { kind: "create"; parentId?: string | null }
-  | { kind: "edit"; project: Project }
-  | null;
 
 export const Route = createFileRoute("/")({
   component: ProjectsIndex,
@@ -27,11 +20,24 @@ export const Route = createFileRoute("/")({
 
 function ProjectsIndex() {
   const { data: projects, isLoading } = useProjects();
+  const create = useCreateProject();
   const remove = useDeleteProject();
   const navigate = useNavigate();
-  const [dialog, setDialog] = useState<DialogState>(null);
 
   const topLevel = (projects ?? []).filter((p) => !p.parentId);
+
+  const handleAdd = async () => {
+    const created = await create.mutateAsync({
+      title: "Untitled project",
+      description: "",
+      descriptionFormat: "plaintext",
+      parentId: null,
+    });
+    navigate({
+      to: "/projects/$projectId",
+      params: { projectId: created.id },
+    });
+  };
 
   return (
     <div className="flex h-full flex-col gap-6 p-8">
@@ -42,7 +48,7 @@ function ProjectsIndex() {
             Top-level workspaces for your tasks
           </p>
         </div>
-        <Button onClick={() => setDialog({ kind: "create" })}>
+        <Button onClick={handleAdd}>
           <Plus />
           New project
         </Button>
@@ -51,7 +57,7 @@ function ProjectsIndex() {
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : topLevel.length === 0 ? (
-        <EmptyProjects onAdd={() => setDialog({ kind: "create" })} />
+        <EmptyProjects onAdd={handleAdd} />
       ) : (
         <ul className="grid max-w-3xl grid-cols-1 gap-2 sm:grid-cols-2">
           {topLevel.map((p) => (
@@ -64,19 +70,10 @@ function ProjectsIndex() {
                   params: { projectId: p.id },
                 })
               }
-              onEdit={() => setDialog({ kind: "edit", project: p })}
               onDelete={() => remove.mutate(p.id)}
             />
           ))}
         </ul>
-      )}
-
-      {dialog && (
-        <ProjectDialog
-          open
-          onOpenChange={(open) => !open && setDialog(null)}
-          mode={dialog}
-        />
       )}
     </div>
   );
@@ -85,12 +82,10 @@ function ProjectsIndex() {
 function ProjectCard({
   project,
   onOpen,
-  onEdit,
   onDelete,
 }: {
   project: Project;
   onOpen: () => void;
-  onEdit: () => void;
   onDelete: () => void;
 }) {
   const hasDescription = project.description.trim().length > 0;
@@ -115,15 +110,6 @@ function ProjectCard({
           className="ml-auto text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
         />
       </button>
-      <Button
-        size="icon"
-        variant="ghost"
-        className="opacity-0 transition-opacity group-hover:opacity-100"
-        onClick={onEdit}
-        aria-label="Edit project"
-      >
-        <Pencil />
-      </Button>
       <Button
         size="icon"
         variant="ghost"

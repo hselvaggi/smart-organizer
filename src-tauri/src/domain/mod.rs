@@ -63,6 +63,7 @@ pub struct Story {
     pub title: String,
     pub description: String,
     pub description_format: TextFormat,
+    pub status: TaskStatus,
     #[ts(type = "number")]
     pub sort_order: i64,
     pub created_at: String,
@@ -171,6 +172,31 @@ pub struct UpdateStory {
     pub title: Option<String>,
     pub description: Option<String>,
     pub description_format: Option<TextFormat>,
+    pub status: Option<TaskStatus>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/generated/")]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectBoard {
+    pub stories: Vec<Story>,
+    pub tasks: Vec<Task>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/generated/")]
+#[serde(rename_all = "camelCase")]
+pub struct Capability {
+    pub name: String,
+    pub detected_path: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/generated/")]
+#[serde(rename_all = "camelCase")]
+pub struct SystemInfo {
+    pub os: String,
+    pub capabilities: Vec<Capability>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]

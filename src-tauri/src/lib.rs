@@ -43,6 +43,7 @@ pub fn run() {
             commands::projects::create_project,
             commands::projects::update_project,
             commands::projects::delete_project,
+            commands::projects::get_project_board,
             commands::stories::list_stories,
             commands::stories::get_story,
             commands::stories::create_story,
@@ -56,6 +57,7 @@ pub fn run() {
             commands::comments::list_comments,
             commands::comments::create_comment,
             commands::comments::delete_comment,
+            commands::system::get_system_info,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

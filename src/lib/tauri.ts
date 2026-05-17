@@ -6,7 +6,9 @@ import type {
   NewStory,
   NewTask,
   Project,
+  ProjectBoard,
   Story,
+  SystemInfo,
   Task,
   UpdateProject,
   UpdateStory,
@@ -20,6 +22,8 @@ export const api = {
   updateProject: (input: UpdateProject) =>
     invoke<Project>("update_project", { input }),
   deleteProject: (id: string) => invoke<void>("delete_project", { id }),
+  getProjectBoard: (projectId: string) =>
+    invoke<ProjectBoard>("get_project_board", { projectId }),
 
   listStories: (projectId: string) =>
     invoke<Story[]>("list_stories", { projectId }),
@@ -40,4 +44,6 @@ export const api = {
   createComment: (input: NewComment) =>
     invoke<Comment>("create_comment", { input }),
   deleteComment: (id: string) => invoke<void>("delete_comment", { id }),
+
+  getSystemInfo: () => invoke<SystemInfo>("get_system_info"),
 };

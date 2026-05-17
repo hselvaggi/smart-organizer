@@ -1,10 +1,13 @@
+export type { Capability } from "./Capability";
 export type { Comment } from "./Comment";
 export type { NewComment } from "./NewComment";
 export type { NewProject } from "./NewProject";
 export type { NewStory } from "./NewStory";
 export type { NewTask } from "./NewTask";
 export type { Project } from "./Project";
+export type { ProjectBoard } from "./ProjectBoard";
 export type { Story } from "./Story";
+export type { SystemInfo } from "./SystemInfo";
 export type { Task } from "./Task";
 export type { TaskStatus } from "./TaskStatus";
 export type { TextFormat } from "./TextFormat";

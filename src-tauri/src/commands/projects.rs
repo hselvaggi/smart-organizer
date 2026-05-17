@@ -1,7 +1,7 @@
 use tauri::State;
 
 use crate::db;
-use crate::domain::{NewProject, Project, UpdateProject};
+use crate::domain::{NewProject, Project, ProjectBoard, UpdateProject};
 use crate::error::AppResult;
 use crate::state::AppState;
 
@@ -40,4 +40,14 @@ pub async fn delete_project(
     id: String,
 ) -> AppResult<()> {
     db::projects::soft_delete(&state.db, &id).await
+}
+
+#[tauri::command]
+pub async fn get_project_board(
+    state: State<'_, AppState>,
+    project_id: String,
+) -> AppResult<ProjectBoard> {
+    let stories = db::stories::list_for_project(&state.db, &project_id).await?;
+    let tasks = db::tasks::list_for_project(&state.db, &project_id).await?;
+    Ok(ProjectBoard { stories, tasks })
 }
