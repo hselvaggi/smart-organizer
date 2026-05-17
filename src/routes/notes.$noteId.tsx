@@ -4,7 +4,7 @@ import { Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Breadcrumb, type BreadcrumbItem } from "@/components/breadcrumb";
-import { SplitEditor } from "@/components/editor/split-editor";
+import { RichTextField } from "@/components/rich-text-field";
 import {
   useDeleteNote,
   useNote,
@@ -114,17 +114,15 @@ function NoteDetail() {
         </div>
       </header>
 
-      <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium">Body</label>
-        <SplitEditor
-          value={body}
-          onChange={setBody}
-          format={bodyFormat}
-          onFormatChange={setBodyFormat}
-          placeholder="Write your note here…"
-          minHeight={480}
-        />
-      </div>
+      <RichTextField
+        label="Body"
+        value={body}
+        onChange={setBody}
+        format={bodyFormat}
+        onFormatChange={setBodyFormat}
+        placeholder="Write your note here…"
+        emptyLabel="Empty note — click to start writing."
+      />
     </div>
   );
 }

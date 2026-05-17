@@ -50,7 +50,7 @@ export function RichTextField({
         />
       ) : value.trim() ? (
         <div
-          className="prose-tasks rounded-md border border-border bg-card/40 p-4"
+          className="prose-tasks rounded-md border border-border bg-muted/50 p-4"
           dangerouslySetInnerHTML={{ __html: rendered }}
         />
       ) : (
