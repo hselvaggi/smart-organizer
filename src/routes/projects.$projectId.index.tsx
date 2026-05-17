@@ -11,20 +11,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Breadcrumb, type BreadcrumbItem } from "@/components/breadcrumb";
 import { SplitEditor } from "@/components/editor/split-editor";
 import { StatusIcon, nextStatus } from "@/components/task/task-status";
 import {
   useDeleteProject,
   useProject,
-  useProjects,
   useUpdateProject,
 } from "@/lib/queries/projects";
 import {
@@ -44,7 +36,6 @@ function ProjectDetail() {
   const navigate = useNavigate();
 
   const { data: project } = useProject(projectId);
-  const { data: allProjects } = useProjects();
   const { data: stories } = useStories(projectId);
 
   const update = useUpdateProject();
@@ -57,14 +48,12 @@ function ProjectDetail() {
   const [description, setDescription] = useState("");
   const [descriptionFormat, setDescriptionFormat] =
     useState<TextFormat>("plaintext");
-  const [parentId, setParentId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!project) return;
     setTitle(project.title);
     setDescription(project.description);
     setDescriptionFormat(project.descriptionFormat);
-    setParentId(project.parentId);
   }, [project]);
 
   const items: BreadcrumbItem[] = [
@@ -81,7 +70,6 @@ function ProjectDetail() {
       title: title.trim(),
       description,
       descriptionFormat,
-      parentId,
     });
   };
 
@@ -103,8 +91,6 @@ function ProjectDetail() {
       params: { projectId, storyId: created.id },
     });
   };
-
-  const parentOptions = (allProjects ?? []).filter((p) => p.id !== projectId);
 
   if (!project) {
     return (
@@ -157,25 +143,6 @@ function ProjectDetail() {
       </header>
 
       <div className="flex flex-col gap-4">
-        <Field label="Parent project (optional)">
-          <Select
-            value={parentId ?? "__none__"}
-            onValueChange={(v) => setParentId(v === "__none__" ? null : v)}
-          >
-            <SelectTrigger className="w-72">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="__none__">— top-level —</SelectItem>
-              {parentOptions.map((p) => (
-                <SelectItem key={p.id} value={p.id}>
-                  {p.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-
         <Field label="Description">
           <SplitEditor
             value={description}

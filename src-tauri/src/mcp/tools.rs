@@ -226,7 +226,6 @@ pub static TOOLS: &[ToolDef] = &[
                     ("title", STR),
                     ("description", STR),
                     ("descriptionFormat", TEXT_FORMAT),
-                    ("parentId", OPT_STR),
                 ],
                 &["title"],
             )
@@ -243,7 +242,6 @@ pub static TOOLS: &[ToolDef] = &[
                     ("title", OPT_STR),
                     ("description", OPT_STR),
                     ("descriptionFormat", TEXT_FORMAT),
-                    ("parentId", OPT_STR),
                 ],
                 &["id"],
             )

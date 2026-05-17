@@ -43,7 +43,6 @@ impl Default for TaskStatus {
 #[serde(rename_all = "camelCase")]
 pub struct Project {
     pub id: String,
-    pub parent_id: Option<String>,
     pub title: String,
     pub description: String,
     pub description_format: TextFormat,
@@ -110,8 +109,6 @@ pub struct Comment {
 pub struct NewProject {
     pub title: String,
     #[serde(default)]
-    pub parent_id: Option<String>,
-    #[serde(default)]
     pub description: String,
     #[serde(default)]
     pub description_format: TextFormat,
@@ -161,7 +158,6 @@ pub struct UpdateProject {
     pub title: Option<String>,
     pub description: Option<String>,
     pub description_format: Option<TextFormat>,
-    pub parent_id: Option<Option<String>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]

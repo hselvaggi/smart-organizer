@@ -1,6 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
 import type {
   Comment,
+  McpMode,
+  McpStatus,
   NewComment,
   NewProject,
   NewStory,
@@ -46,4 +48,7 @@ export const api = {
   deleteComment: (id: string) => invoke<void>("delete_comment", { id }),
 
   getSystemInfo: () => invoke<SystemInfo>("get_system_info"),
+  resetDatabase: () => invoke<void>("reset_database"),
+  getMcpStatus: () => invoke<McpStatus>("get_mcp_status"),
+  setMcpMode: (mode: McpMode) => invoke<McpStatus>("set_mcp_mode", { mode }),
 };

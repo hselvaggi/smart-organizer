@@ -1,5 +1,6 @@
 import { Outlet, Link, createRootRoute } from "@tanstack/react-router";
 import { FolderKanban, Settings2, Cpu } from "lucide-react";
+import { ResizeHandles } from "@/components/resize-handles";
 import { TitleBar } from "@/components/title-bar";
 import { cn } from "@/lib/cn";
 
@@ -9,7 +10,8 @@ export const Route = createRootRoute({
 
 function RootLayout() {
   return (
-    <div className="flex h-full flex-col bg-background">
+    <div className="relative flex h-full flex-col bg-background">
+      <ResizeHandles />
       <TitleBar />
       <div className="grid min-h-0 flex-1 grid-cols-[220px_1fr]">
         <aside className="flex flex-col gap-1 border-r border-border bg-card/40 p-3">

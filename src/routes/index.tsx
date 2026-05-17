@@ -24,14 +24,11 @@ function ProjectsIndex() {
   const remove = useDeleteProject();
   const navigate = useNavigate();
 
-  const topLevel = (projects ?? []).filter((p) => !p.parentId);
-
   const handleAdd = async () => {
     const created = await create.mutateAsync({
       title: "Untitled project",
       description: "",
       descriptionFormat: "plaintext",
-      parentId: null,
     });
     navigate({
       to: "/projects/$projectId",
@@ -56,11 +53,11 @@ function ProjectsIndex() {
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
-      ) : topLevel.length === 0 ? (
+      ) : (projects ?? []).length === 0 ? (
         <EmptyProjects onAdd={handleAdd} />
       ) : (
         <ul className="grid max-w-3xl grid-cols-1 gap-2 sm:grid-cols-2">
-          {topLevel.map((p) => (
+          {(projects ?? []).map((p) => (
             <ProjectCard
               key={p.id}
               project={p}

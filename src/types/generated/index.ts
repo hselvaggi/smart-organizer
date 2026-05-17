@@ -1,5 +1,7 @@
 export type { Capability } from "./Capability";
 export type { Comment } from "./Comment";
+export type { McpMode } from "./McpMode";
+export type { McpStatus } from "./McpStatus";
 export type { NewComment } from "./NewComment";
 export type { NewProject } from "./NewProject";
 export type { NewStory } from "./NewStory";

@@ -6,7 +6,7 @@ use crate::error::{AppError, AppResult};
 
 pub async fn list_all(pool: &SqlitePool) -> AppResult<Vec<Project>> {
     let rows = sqlx::query_as::<_, Project>(
-        "SELECT id, parent_id, title, description, description_format,
+        "SELECT id, title, description, description_format,
                 sort_order, created_at, updated_at, deleted_at
          FROM projects
          WHERE deleted_at IS NULL
@@ -19,7 +19,7 @@ pub async fn list_all(pool: &SqlitePool) -> AppResult<Vec<Project>> {
 
 pub async fn get(pool: &SqlitePool, id: &str) -> AppResult<Option<Project>> {
     let row = sqlx::query_as::<_, Project>(
-        "SELECT id, parent_id, title, description, description_format,
+        "SELECT id, title, description, description_format,
                 sort_order, created_at, updated_at, deleted_at
          FROM projects
          WHERE id = ?1 AND deleted_at IS NULL",
@@ -33,21 +33,18 @@ pub async fn get(pool: &SqlitePool, id: &str) -> AppResult<Option<Project>> {
 pub async fn create(pool: &SqlitePool, input: NewProject) -> AppResult<Project> {
     let id = new_id();
     let now = now_iso();
-    let next_order: i64 = sqlx::query_scalar(
-        "SELECT COALESCE(MAX(sort_order), -1) + 1 FROM projects WHERE parent_id IS ?1",
-    )
-    .bind(&input.parent_id)
-    .fetch_one(pool)
-    .await?;
+    let next_order: i64 =
+        sqlx::query_scalar("SELECT COALESCE(MAX(sort_order), -1) + 1 FROM projects")
+            .fetch_one(pool)
+            .await?;
 
     sqlx::query(
         "INSERT INTO projects
-            (id, parent_id, title, description, description_format,
+            (id, title, description, description_format,
              sort_order, created_at, updated_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?7)",
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?6)",
     )
     .bind(&id)
-    .bind(&input.parent_id)
     .bind(&input.title)
     .bind(&input.description)
     .bind(input.description_format)
@@ -85,14 +82,6 @@ pub async fn update(pool: &SqlitePool, input: UpdateProject) -> AppResult<Projec
         sqlx::query("UPDATE projects SET description_format = ?2, updated_at = ?3 WHERE id = ?1")
             .bind(&input.id)
             .bind(fmt)
-            .bind(&now)
-            .execute(&mut *tx)
-            .await?;
-    }
-    if let Some(parent) = input.parent_id {
-        sqlx::query("UPDATE projects SET parent_id = ?2, updated_at = ?3 WHERE id = ?1")
-            .bind(&input.id)
-            .bind(parent)
             .bind(&now)
             .execute(&mut *tx)
             .await?;
