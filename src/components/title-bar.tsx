@@ -1,10 +1,20 @@
 import { useEffect, useState } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { Maximize2, Minimize2, Minus, X } from "lucide-react";
+import {
+  Maximize2,
+  Minimize2,
+  Minus,
+  PanelLeftClose,
+  PanelLeftOpen,
+  X,
+} from "lucide-react";
+import { useUiStore } from "@/lib/store/ui";
 
 export function TitleBar() {
   const win = getCurrentWindow();
   const [maximized, setMaximized] = useState(false);
+  const sidebarCollapsed = useUiStore((s) => s.sidebarCollapsed);
+  const toggleSidebar = useUiStore((s) => s.toggleSidebar);
 
   useEffect(() => {
     win.isMaximized().then(setMaximized);
@@ -19,14 +29,26 @@ export function TitleBar() {
   return (
     <div
       data-tauri-drag-region
-      className="flex h-9 select-none items-center justify-between border-b border-border bg-card/80 pl-3 pr-1"
+      className="flex h-9 select-none items-center justify-between border-b border-border bg-card/80 pl-1 pr-1"
     >
-      <span
-        data-tauri-drag-region
-        className="text-xs font-semibold tracking-tight text-foreground"
-      >
-        Tasks
-      </span>
+      <div className="flex items-center gap-1">
+        <TitleBarButton
+          onClick={toggleSidebar}
+          label={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
+        >
+          {sidebarCollapsed ? (
+            <PanelLeftOpen size={14} />
+          ) : (
+            <PanelLeftClose size={14} />
+          )}
+        </TitleBarButton>
+        <span
+          data-tauri-drag-region
+          className="px-1 text-xs font-semibold tracking-tight text-foreground"
+        >
+          Tasks
+        </span>
+      </div>
       <div className="flex items-center">
         <TitleBarButton onClick={() => win.minimize()} label="Minimize">
           <Minus size={14} />
