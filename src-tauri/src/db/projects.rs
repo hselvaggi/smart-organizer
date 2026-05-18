@@ -56,7 +56,7 @@ pub async fn create(pool: &SqlitePool, input: NewProject) -> AppResult<Project> 
 
     let project = get(pool, &id)
         .await?
-        .ok_or_else(|| AppError::Other("project missing after insert".into()))?;
+        .ok_or_else(|| AppError::Missing("project missing after insert"))?;
     search::index_project(pool, &project).await?;
     Ok(project)
 }
@@ -94,7 +94,7 @@ pub async fn update(pool: &SqlitePool, input: UpdateProject) -> AppResult<Projec
 
     let project = get(pool, &input.id)
         .await?
-        .ok_or_else(|| AppError::Other("project missing after update".into()))?;
+        .ok_or_else(|| AppError::Missing("project missing after update"))?;
     search::index_project(pool, &project).await?;
     Ok(project)
 }

@@ -62,7 +62,7 @@ pub async fn create(pool: &SqlitePool, input: NewStory) -> AppResult<Story> {
 
     let story = get(pool, &id)
         .await?
-        .ok_or_else(|| AppError::Other("story missing after insert".into()))?;
+        .ok_or_else(|| AppError::Missing("story missing after insert"))?;
     search::index_story(pool, &story).await?;
     Ok(story)
 }
@@ -123,7 +123,7 @@ pub async fn update(pool: &SqlitePool, input: UpdateStory) -> AppResult<Story> {
 
     let story = get(pool, &input.id)
         .await?
-        .ok_or_else(|| AppError::Other("story missing after update".into()))?;
+        .ok_or_else(|| AppError::Missing("story missing after update"))?;
     search::index_story(pool, &story).await?;
     Ok(story)
 }

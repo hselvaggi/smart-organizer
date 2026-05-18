@@ -66,7 +66,7 @@ pub async fn create(pool: &SqlitePool, input: NewNote) -> AppResult<Note> {
 
     let note = get(pool, &id)
         .await?
-        .ok_or_else(|| AppError::Other("note missing after insert".into()))?;
+        .ok_or_else(|| AppError::Missing("note missing after insert"))?;
     search::index_note(pool, &note).await?;
     Ok(note)
 }
@@ -104,7 +104,7 @@ pub async fn update(pool: &SqlitePool, input: UpdateNote) -> AppResult<Note> {
 
     let note = get(pool, &input.id)
         .await?
-        .ok_or_else(|| AppError::Other("note missing after update".into()))?;
+        .ok_or_else(|| AppError::Missing("note missing after update"))?;
     search::index_note(pool, &note).await?;
     Ok(note)
 }

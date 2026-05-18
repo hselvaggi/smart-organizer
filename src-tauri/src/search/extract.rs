@@ -59,45 +59,28 @@ fn from_latex(text: &str) -> String {
     let mut in_math = false;
     while i < bytes.len() {
         let b = bytes[i];
-        if b == b'\\' {
-            // Skip a control sequence: \name or \name{...arg...}
-            i += 1;
-            while i < bytes.len() && bytes[i].is_ascii_alphabetic() {
+        match b {
+            b'\\' => {
                 i += 1;
-            }
-            // Optionally consume one braced argument as separator
-            if i < bytes.len() && bytes[i] == b'{' {
-                let mut depth = 1;
-                i += 1;
-                let start = i;
-                while i < bytes.len() && depth > 0 {
-                    match bytes[i] {
-                        b'{' => depth += 1,
-                        b'}' => depth -= 1,
-                        _ => {}
-                    }
+                while i < bytes.len() && bytes[i].is_ascii_alphabetic() {
                     i += 1;
                 }
-                let end = i.saturating_sub(1);
-                if start < end {
-                    if let Ok(inner) = std::str::from_utf8(&bytes[start..end]) {
-                        out.push(' ');
-                        out.push_str(&from_latex(inner));
-                        out.push(' ');
-                    }
-                }
-            } else {
                 out.push(' ');
             }
-        } else if b == b'$' {
-            in_math = !in_math;
-            out.push(' ');
-            i += 1;
-        } else if !in_math {
-            out.push(b as char);
-            i += 1;
-        } else {
-            i += 1;
+            b'$' => {
+                in_math = !in_math;
+                out.push(' ');
+                i += 1;
+            }
+            b'{' | b'}' => {
+                out.push(' ');
+                i += 1;
+            }
+            _ if in_math => i += 1,
+            _ => {
+                out.push(b as char);
+                i += 1;
+            }
         }
     }
     collapse_whitespace(&out)
@@ -170,6 +153,21 @@ mod tests {
         assert!(!out.contains("\\frac"));
         assert!(!out.contains("\\textbf"));
         assert!(!out.contains('$'));
+    }
+
+    #[test]
+    fn deeply_nested_latex_no_stack_overflow() {
+        let depth = 5_000;
+        let mut input = String::new();
+        for _ in 0..depth {
+            input.push_str("\\textbf{");
+        }
+        input.push_str("deep");
+        for _ in 0..depth {
+            input.push('}');
+        }
+        let out = extract(&input, TextFormat::Latex);
+        assert!(out.contains("deep"));
     }
 
     #[test]

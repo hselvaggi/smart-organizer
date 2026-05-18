@@ -15,7 +15,9 @@ pub enum AppError {
     Io(#[from] std::io::Error),
 
     #[error("{0}")]
-    #[allow(dead_code)]
+    Missing(&'static str),
+
+    #[error("{0}")]
     Other(String),
 }
 

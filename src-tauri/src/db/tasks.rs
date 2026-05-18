@@ -81,7 +81,7 @@ pub async fn create(pool: &SqlitePool, input: NewTask) -> AppResult<Task> {
 
     let task = get(pool, &id)
         .await?
-        .ok_or_else(|| AppError::Other("task missing after insert".into()))?;
+        .ok_or_else(|| AppError::Missing("task missing after insert"))?;
     search::index_task(pool, &task).await?;
     Ok(task)
 }
@@ -174,7 +174,7 @@ pub async fn update(pool: &SqlitePool, input: UpdateTask) -> AppResult<Task> {
 
     let task = get(pool, &input.id)
         .await?
-        .ok_or_else(|| AppError::Other("task missing after update".into()))?;
+        .ok_or_else(|| AppError::Missing("task missing after update"))?;
     search::index_task(pool, &task).await?;
     Ok(task)
 }

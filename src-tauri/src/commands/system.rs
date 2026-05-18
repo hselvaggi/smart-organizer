@@ -113,6 +113,7 @@ pub async fn reset_database(state: State<'_, AppState>) -> AppResult<()> {
     for table in [
         "search_index",
         "comments",
+        "notes",
         "tasks",
         "stories",
         "projects",

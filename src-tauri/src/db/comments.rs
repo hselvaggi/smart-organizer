@@ -41,7 +41,7 @@ pub async fn create(pool: &SqlitePool, input: NewComment) -> AppResult<Comment> 
     .fetch_optional(pool)
     .await?;
 
-    let comment = row.ok_or_else(|| AppError::Other("comment missing after insert".into()))?;
+    let comment = row.ok_or_else(|| AppError::Missing("comment missing after insert"))?;
     search::index_comment(pool, &comment).await?;
     Ok(comment)
 }
