@@ -8,6 +8,7 @@ import {
   Check,
   Circle,
   Copy,
+  Power,
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,8 +42,30 @@ function SettingsPage() {
 
       <DeadlinesSection />
       <McpSection />
+      <ApplicationSection />
       <DangerZone />
     </div>
+  );
+}
+
+function ApplicationSection() {
+  return (
+    <section className="flex max-w-2xl flex-col gap-3 rounded-md border border-border bg-card/40 p-4">
+      <header className="flex items-center gap-2">
+        <Power size={16} className="text-muted-foreground" />
+        <h3 className="text-sm font-semibold">Application</h3>
+      </header>
+      <p className="text-xs text-muted-foreground">
+        Closing the window via the X minimises Organizer to the tray. Use
+        this to actually shut it down.
+      </p>
+      <div>
+        <Button type="button" variant="outline" onClick={() => api.quitApp()}>
+          <Power />
+          Quit Organizer
+        </Button>
+      </div>
+    </section>
   );
 }
 

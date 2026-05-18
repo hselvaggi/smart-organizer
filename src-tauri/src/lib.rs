@@ -146,6 +146,7 @@ pub fn run() {
             commands::notes::delete_note,
             commands::system::get_system_info,
             commands::system::reset_database,
+            commands::system::quit_app,
             commands::system::get_mcp_status,
             commands::system::set_mcp_mode,
         ])

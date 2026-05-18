@@ -60,6 +60,7 @@ export const api = {
 
   getSystemInfo: () => invoke<SystemInfo>("get_system_info"),
   resetDatabase: () => invoke<void>("reset_database"),
+  quitApp: () => invoke<void>("quit_app"),
   getMcpStatus: () => invoke<McpStatus>("get_mcp_status"),
   setMcpMode: (mode: McpMode) => invoke<McpStatus>("set_mcp_mode", { mode }),
 };

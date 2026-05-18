@@ -103,6 +103,11 @@ pub async fn set_mcp_mode(
 }
 
 #[tauri::command]
+pub fn quit_app(app: tauri::AppHandle) {
+    app.exit(0);
+}
+
+#[tauri::command]
 pub async fn reset_database(state: State<'_, AppState>) -> AppResult<()> {
     let mut tx = state.db.begin().await?;
     for table in [
