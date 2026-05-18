@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import {
   ChevronRight,
   FileText,
@@ -56,6 +57,7 @@ export const Route = createFileRoute(
 });
 
 function StoryDetail() {
+  const { t } = useTranslation();
   const { projectId, storyId } = Route.useParams();
   const navigate = useNavigate();
 
@@ -90,7 +92,7 @@ function StoryDetail() {
     (tasks ?? []).filter((t) => t.parentTaskId === id).length;
 
   const items: BreadcrumbItem[] = [
-    { label: "Projects", to: "/" },
+    { label: t("nav.projects"), to: "/" },
     {
       label: project?.title ?? "…",
       to: "/projects/$projectId",
@@ -122,7 +124,7 @@ function StoryDetail() {
   const handleAddTask = async () => {
     const created = await createTask.mutateAsync({
       storyId,
-      title: "Untitled task",
+      title: t("common.untitledTask"),
       description: "",
       descriptionFormat: "plaintext",
       parentTaskId: null,
@@ -137,7 +139,7 @@ function StoryDetail() {
     return (
       <div className="flex h-full flex-col gap-6 p-8">
         <Breadcrumb items={items} />
-        <p className="text-sm text-muted-foreground">Loading story…</p>
+        <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
       </div>
     );
   }
@@ -151,7 +153,7 @@ function StoryDetail() {
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Story title"
+          placeholder={t("fields.title")}
           className="flex-1 text-xl font-semibold"
         />
         <div className="flex items-center gap-2">
@@ -159,27 +161,27 @@ function StoryDetail() {
             type="button"
             variant="ghost"
             onClick={handleDelete}
-            aria-label="Delete story"
+            aria-label={t("stories.deleteAria")}
           >
             <Trash2 />
-            Delete
+            {t("common.delete")}
           </Button>
           <Button type="button" onClick={handleSave} disabled={!canSave}>
             <Save />
-            {update.isPending ? "Saving…" : "Save"}
+            {t(update.isPending ? "common.saving" : "common.save")}
           </Button>
         </div>
       </header>
 
       <div className="flex flex-col gap-4">
         <RichTextField
-          label="Description"
+          label={t("fields.description")}
           value={description}
           onChange={setDescription}
           format={descriptionFormat}
           onFormatChange={setDescriptionFormat}
-          placeholder="Context, goals, references…"
-          emptyLabel="No description yet — click to add one."
+          placeholder={t("stories.descriptionPlaceholder")}
+          emptyLabel={t("stories.emptyDescription")}
         />
 
         <TasksSection
@@ -210,7 +212,7 @@ function StoryDetail() {
         />
 
         <div className="flex flex-wrap gap-4">
-          <Field label="Status">
+          <Field label={t("fields.status")}>
             <Select
               value={status}
               onValueChange={(v) => setStatus(v as TaskStatus)}
@@ -221,14 +223,14 @@ function StoryDetail() {
               <SelectContent>
                 {STATUSES.map((s) => (
                   <SelectItem key={s} value={s}>
-                    {s.replace("_", " ")}
+                    {t(`status.${s}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </Field>
 
-          <Field label="Due date">
+          <Field label={t("fields.dueDate")}>
             <Input
               type="date"
               value={dueDate}
@@ -257,29 +259,30 @@ function TasksSection({
   onToggle: (t: Task) => void;
   onDelete: (id: string) => void;
 }) {
+  const { t } = useTranslation();
   const [yellowDays] = useYellowDays();
   return (
     <section className="flex flex-col gap-2 border-t border-border pt-4">
       <header className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Tasks</h3>
+        <h3 className="text-sm font-semibold">{t("fields.tasks")}</h3>
         <Button type="button" size="sm" variant="outline" onClick={onAdd}>
           <Plus />
-          Add task
+          {t("stories.addTask")}
         </Button>
       </header>
 
       {tasks.length === 0 ? (
         <p className="rounded-md border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-          No tasks yet — break this story down with "Add task".
+          {t("stories.noTasks")}
         </p>
       ) : (
         <ul className="flex flex-col gap-1">
-          {tasks.map((t) => (
+          {tasks.map((task) => (
             <li
-              key={t.id}
+              key={task.id}
               className={cn(
                 "group rounded-md border border-border bg-card transition-colors hover:border-primary/40",
-                DEADLINE_BORDER[getDeadlineStatus(t.dueDate, t.status, yellowDays)],
+                DEADLINE_BORDER[getDeadlineStatus(task.dueDate, task.status, yellowDays)],
               )}
             >
               <div className="flex items-center gap-2 p-2">
@@ -287,36 +290,32 @@ function TasksSection({
                   type="button"
                   size="icon"
                   variant="ghost"
-                  onClick={() => onToggle(t)}
-                  aria-label="Toggle status"
+                  onClick={() => onToggle(task)}
+                  aria-label={t("tasks.toggleStatusAria")}
                 >
-                  <StatusIcon status={t.status} />
+                  <StatusIcon status={task.status} />
                 </Button>
                 <button
                   type="button"
-                  onClick={() => onOpen(t.id)}
+                  onClick={() => onOpen(task.id)}
                   className="flex flex-1 items-center gap-2 text-left text-sm"
                 >
                   <span
-                    className={t.status === "done" ? "line-through opacity-60" : ""}
+                    className={task.status === "done" ? "line-through opacity-60" : ""}
                   >
-                    {t.title}
+                    {task.title}
                   </span>
-                  {t.description.trim().length > 0 && (
-                    <FileText
-                      size={12}
-                      className="text-muted-foreground"
-                      aria-label="Has description"
-                    />
+                  {task.description.trim().length > 0 && (
+                    <FileText size={12} className="text-muted-foreground" />
                   )}
-                  {subtaskCount(t.id) > 0 && (
+                  {subtaskCount(task.id) > 0 && (
                     <span className="flex items-center gap-0.5 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                       <ListTree size={10} />
-                      {subtaskCount(t.id)}
+                      {subtaskCount(task.id)}
                     </span>
                   )}
                   <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
-                    Open
+                    {t("common.open")}
                     <ChevronRight size={12} />
                   </span>
                 </button>
@@ -325,8 +324,8 @@ function TasksSection({
                   size="icon"
                   variant="ghost"
                   className="opacity-0 transition-opacity group-hover:opacity-100"
-                  onClick={() => onDelete(t.id)}
-                  aria-label="Delete task"
+                  onClick={() => onDelete(task.id)}
+                  aria-label={t("stories.deleteTaskAria")}
                 >
                   <Trash2 />
                 </Button>

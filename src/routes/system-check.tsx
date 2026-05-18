@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Check, Copy, X } from "lucide-react";
 import { useState } from "react";
 import { writeText as tauriWriteText } from "@tauri-apps/plugin-clipboard-manager";
@@ -83,6 +84,7 @@ const META: Record<string, CapMeta> = {
 };
 
 function SystemCheck() {
+  const { t } = useTranslation();
   const { data, isLoading, error } = useQuery({
     queryKey: ["system-info"],
     queryFn: api.getSystemInfo,
@@ -91,27 +93,31 @@ function SystemCheck() {
   return (
     <div className="flex h-full flex-col gap-6 overflow-y-auto p-8">
       <header>
-        <h2 className="text-xl font-semibold tracking-tight">System check</h2>
+        <h2 className="text-xl font-semibold tracking-tight">
+          {t("systemCheck.heading")}
+        </h2>
         <p className="text-sm text-muted-foreground">
-          Optional tools that unlock extra features. Everything below is
-          opt-in — the app works fine without them.
+          {t("systemCheck.subtitle")}
         </p>
       </header>
 
       {isLoading && (
-        <p className="text-sm text-muted-foreground">Probing system…</p>
+        <p className="text-sm text-muted-foreground">
+          {t("systemCheck.loading")}
+        </p>
       )}
 
       {error && (
         <p className="text-sm text-destructive">
-          Failed to probe system: {String(error)}
+          {t("systemCheck.failed")}: {String(error)}
         </p>
       )}
 
       {data && (
         <div className="max-w-4xl">
           <p className="mb-4 text-xs text-muted-foreground">
-            Detected platform: <span className="font-mono">{data.os}</span>
+            {t("systemCheck.detectedPlatform")}:{" "}
+            <span className="font-mono">{data.os}</span>
           </p>
           <ul className="flex flex-col gap-2">
             {data.capabilities.map((cap) => (
@@ -131,6 +137,7 @@ function CapabilityRow({
   cap: { name: string; detectedPath: string | null };
   os: string;
 }) {
+  const { t } = useTranslation();
   const meta = META[cap.name];
   const installCmd = meta?.install[os] ?? meta?.install.linux ?? "";
   const [copied, setCopied] = useState(false);
@@ -194,10 +201,10 @@ function CapabilityRow({
             size="sm"
             variant="ghost"
             onClick={handleCopy}
-            aria-label="Copy install command"
+            aria-label={t("systemCheck.copyAria")}
           >
             {copied ? <Check /> : <Copy />}
-            {copied ? "Copied" : "Copy"}
+            {t(copied ? "common.copied" : "common.copy")}
           </Button>
         </div>
       )}

@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import { ChevronRight, NotebookPen, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/notes/")({
 });
 
 function NotesIndex() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: notes, isLoading } = useNotes();
   const create = useCreateNote();
@@ -20,7 +22,7 @@ function NotesIndex() {
 
   const handleAdd = async () => {
     const created = await create.mutateAsync({
-      title: "Untitled note",
+      title: t("common.untitledNote"),
       body: "",
       bodyFormat: "plaintext",
       projectId: null,
@@ -32,19 +34,21 @@ function NotesIndex() {
     <div className="flex h-full flex-col gap-6 p-8">
       <header className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight">Notes</h2>
+          <h2 className="text-xl font-semibold tracking-tight">
+            {t("notes.indexHeading")}
+          </h2>
           <p className="text-sm text-muted-foreground">
-            Standalone notes, independent of projects and tasks.
+            {t("notes.indexSubtitle")}
           </p>
         </div>
         <Button onClick={handleAdd}>
           <Plus />
-          New note
+          {t("notes.newNote")}
         </Button>
       </header>
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
       ) : !notes || notes.length === 0 ? (
         <EmptyNotes onAdd={handleAdd} />
       ) : (
@@ -77,6 +81,7 @@ function NoteCard({
   onOpen: () => void;
   onDelete: () => void;
 }) {
+  const { t } = useTranslation();
   const preview = note.body.replace(/\s+/g, " ").trim().slice(0, 180);
   return (
     <li className="group flex flex-col gap-2 rounded-md border border-border bg-card p-3 transition-colors hover:border-primary/40">
@@ -110,7 +115,7 @@ function NoteCard({
           variant="ghost"
           className="opacity-0 transition-opacity group-hover:opacity-100"
           onClick={onDelete}
-          aria-label="Delete note"
+          aria-label={t("notes.deleteAria")}
         >
           <Trash2 />
         </Button>
@@ -120,17 +125,17 @@ function NoteCard({
 }
 
 function EmptyNotes({ onAdd }: { onAdd: () => void }) {
+  const { t } = useTranslation();
   return (
     <div className="flex max-w-3xl flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border p-12 text-center">
       <NotebookPen className="size-10 text-muted-foreground" />
-      <h3 className="text-sm font-medium">No notes yet</h3>
+      <h3 className="text-sm font-medium">{t("notes.emptyTitle")}</h3>
       <p className="max-w-sm text-xs text-muted-foreground">
-        Notes live outside the project hierarchy — use them for quick
-        thoughts, references or one-off context.
+        {t("notes.emptyHelp")}
       </p>
       <Button onClick={onAdd} size="sm">
         <Plus />
-        New note
+        {t("notes.newNote")}
       </Button>
     </div>
   );

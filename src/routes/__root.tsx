@@ -1,4 +1,5 @@
 import { Outlet, Link, createRootRoute } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import {
   Cpu,
   FolderKanban,
@@ -16,6 +17,7 @@ export const Route = createRootRoute({
 });
 
 function RootLayout() {
+  const { t } = useTranslation();
   const sidebarCollapsed = useUiStore((s) => s.sidebarCollapsed);
   return (
     <div className="relative flex h-full flex-col bg-background">
@@ -35,27 +37,33 @@ function RootLayout() {
         >
           <div className="px-2 pb-3 pt-1">
             <h1 className="text-sm font-semibold tracking-tight">Organizer</h1>
-            <p className="text-xs text-muted-foreground">
-              Local-first work tracker
-            </p>
+            <p className="text-xs text-muted-foreground">{t("nav.tagline")}</p>
           </div>
-          <NavItem to="/" icon={<FolderKanban size={16} />} label="Projects" />
+          <NavItem
+            to="/"
+            icon={<FolderKanban size={16} />}
+            label={t("nav.projects")}
+          />
           <NavItem
             to="/notes"
             icon={<NotebookPen size={16} />}
-            label="Notes"
+            label={t("nav.notes")}
           />
           <NavItem
             to="/system-check"
             icon={<Cpu size={16} />}
-            label="System"
+            label={t("nav.system")}
           />
           <NavItem
             to="/settings"
             icon={<Settings2 size={16} />}
-            label="Settings"
+            label={t("nav.settings")}
           />
-          <NavItem to="/about" icon={<Info size={16} />} label="About" />
+          <NavItem
+            to="/about"
+            icon={<Info size={16} />}
+            label={t("nav.about")}
+          />
         </aside>
         <main className="overflow-auto">
           <Outlet />

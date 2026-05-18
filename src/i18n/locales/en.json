@@ -1,0 +1,195 @@
+{
+  "common": {
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "create": "Create",
+    "creating": "Creating…",
+    "edit": "Edit",
+    "preview": "Preview",
+    "open": "Open",
+    "copy": "Copy",
+    "copied": "Copied",
+    "loading": "Loading…",
+    "untitled": "Untitled",
+    "untitledProject": "Untitled project",
+    "untitledStory": "Untitled story",
+    "untitledTask": "Untitled task",
+    "untitledSubtask": "Untitled subtask",
+    "untitledNote": "Untitled note",
+    "empty": "Empty — click to add content."
+  },
+  "nav": {
+    "tagline": "Local-first work tracker",
+    "projects": "Projects",
+    "notes": "Notes",
+    "system": "System",
+    "settings": "Settings",
+    "about": "About",
+    "hideSidebar": "Hide sidebar",
+    "showSidebar": "Show sidebar"
+  },
+  "titleBar": {
+    "minimize": "Minimize",
+    "maximize": "Maximize",
+    "restore": "Restore",
+    "close": "Close"
+  },
+  "status": {
+    "todo": "todo",
+    "in_progress": "in progress",
+    "done": "done",
+    "blocked": "blocked",
+    "cancelled": "cancelled"
+  },
+  "format": {
+    "markdown": "markdown",
+    "plaintext": "plaintext",
+    "html": "html",
+    "latex": "latex"
+  },
+  "fields": {
+    "title": "Title",
+    "description": "Description",
+    "body": "Body",
+    "result": "Result / notes",
+    "status": "Status",
+    "dueDate": "Due date",
+    "comments": "Comments",
+    "subtasks": "Subtasks",
+    "tasks": "Tasks",
+    "stories": "Stories"
+  },
+  "timeline": {
+    "started": "Started",
+    "completed": "Completed"
+  },
+  "projects": {
+    "indexHeading": "Projects",
+    "indexSubtitle": "Top-level workspaces for your tasks",
+    "newProject": "New project",
+    "emptyTitle": "No projects yet",
+    "emptyHelp": "Create your first project to start tracking stories and tasks.",
+    "boardButton": "Board",
+    "deleteAria": "Delete project",
+    "addStory": "Add story",
+    "noStories": "No stories yet — group related tasks with \"Add story\".",
+    "addNote": "Add note",
+    "noNotes": "No notes attached to this project yet.",
+    "deleteNoteAria": "Delete note",
+    "deleteStoryAria": "Delete story",
+    "descriptionPlaceholder": "Goals, scope, references…",
+    "emptyDescription": "No description yet — click to add one."
+  },
+  "stories": {
+    "addTask": "Add task",
+    "noTasks": "No tasks yet — break this story down with \"Add task\".",
+    "deleteAria": "Delete story",
+    "deleteTaskAria": "Delete task",
+    "descriptionPlaceholder": "Context, goals, references…",
+    "emptyDescription": "No description yet — click to add one."
+  },
+  "tasks": {
+    "addSubtask": "Add subtask",
+    "noSubtasks": "No subtasks yet — break this task down with \"Add subtask\".",
+    "deleteAria": "Delete task",
+    "deleteSubtaskAria": "Delete subtask",
+    "descriptionPlaceholder": "Add context, requirements, references…",
+    "emptyDescription": "No description yet — click to add one.",
+    "resultPlaceholder": "Outcomes, conclusions, follow-ups…",
+    "emptyResult": "No result yet — click to add one.",
+    "toggleStatusAria": "Toggle status"
+  },
+  "comments": {
+    "heading": "Comments",
+    "empty": "No comments yet. Use this for follow-ups, decisions, or quick notes.",
+    "placeholder": "Write a comment…",
+    "post": "Post comment",
+    "posting": "Posting…",
+    "deleteAria": "Delete comment"
+  },
+  "notes": {
+    "indexHeading": "Notes",
+    "indexSubtitle": "Standalone notes, independent of projects and tasks.",
+    "newNote": "New note",
+    "emptyTitle": "No notes yet",
+    "emptyHelp": "Notes live outside the project hierarchy — use them for quick thoughts, references or one-off context.",
+    "bodyPlaceholder": "Write your note here…",
+    "emptyBody": "Empty note — click to start writing.",
+    "deleteAria": "Delete note"
+  },
+  "board": {
+    "subtitle": "All stories, tasks and subtasks across this project grouped by status.",
+    "headingSuffix": "Board",
+    "emptyState": "Nothing to show yet — create stories and tasks first.",
+    "loading": "Loading board…",
+    "typeStory": "Story",
+    "typeTask": "Task",
+    "typeSubtask": "Subtask"
+  },
+  "settings": {
+    "heading": "Settings",
+    "subtitle": "Device identity, paired peers and preferences will live here.",
+    "language": {
+      "heading": "Language",
+      "description": "Choose the language used across the app.",
+      "english": "English",
+      "spanish": "Español"
+    },
+    "deadlines": {
+      "heading": "Deadlines",
+      "description": "Stories and tasks that are not yet done show a coloured left border on their card based on how close the due date is. Past due is red, within the threshold below is yellow, otherwise green.",
+      "warnBefore": "Warn before:",
+      "days": "day(s) of due date"
+    },
+    "mcp": {
+      "heading": "MCP server (for agents)",
+      "running": "Running",
+      "stopped": "Stopped",
+      "description": "Expose this app's data over a local Model Context Protocol server so an AI agent can read and (optionally) modify your tasks. Disabled by default for security. The server only binds to 127.0.0.1 so it is not reachable from the network.",
+      "modeOff": "Off",
+      "modeOffDescription": "No MCP server. Agents cannot connect.",
+      "modeReadonly": "Read-only",
+      "modeReadonlyDescription": "Agents can list and inspect data but not create, update or delete anything.",
+      "modeFull": "Full access",
+      "modeFullDescription": "Agents can create, update and delete projects, stories, tasks and comments.",
+      "copyEndpoint": "Copy endpoint URL",
+      "failed": "Failed to apply"
+    },
+    "application": {
+      "heading": "Application",
+      "description": "Closing the window via the X minimises Organizer to the tray. Use this to actually shut it down.",
+      "quit": "Quit Organizer"
+    },
+    "dangerZone": {
+      "heading": "Danger zone",
+      "description": "Permanently delete all projects, stories, tasks, comments and paired peers. This cannot be undone.",
+      "resetButton": "Reset database",
+      "dialogTitle": "Reset database",
+      "dialogDescription": "All data on this device will be wiped: projects, stories, tasks, comments, sync state. This is irreversible. Type {{token}} below to confirm.",
+      "confirmPlaceholder": "Type RESET to confirm",
+      "confirmButton": "Reset everything",
+      "wiping": "Wiping…",
+      "done": "Database wiped. Returning to projects…",
+      "failed": "Failed"
+    }
+  },
+  "systemCheck": {
+    "heading": "System check",
+    "subtitle": "Optional tools that unlock extra features. Everything below is opt-in — the app works fine without them.",
+    "loading": "Probing system…",
+    "failed": "Failed to probe system",
+    "detectedPlatform": "Detected platform",
+    "copyAria": "Copy install command"
+  },
+  "about": {
+    "heading": "About",
+    "description": "A simple tool that helps organize tasks, projects and helps to keep track of things with notes.",
+    "version": "Version",
+    "labelAuthor": "Author",
+    "labelStack": "Stack",
+    "labelLicense": "License",
+    "licenseDescription": "PolyForm Noncommercial 1.0.0 — free for personal / noncommercial use. Commercial use requires a separate license; contact"
+  }
+}

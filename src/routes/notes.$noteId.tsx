@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import { Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/notes/$noteId")({
 });
 
 function NoteDetail() {
+  const { t } = useTranslation();
   const { noteId } = Route.useParams();
   const navigate = useNavigate();
 
@@ -39,7 +41,7 @@ function NoteDetail() {
 
   const items: BreadcrumbItem[] = note?.projectId
     ? [
-        { label: "Projects", to: "/" },
+        { label: t("nav.projects"), to: "/" },
         {
           label: project?.title ?? "…",
           to: "/projects/$projectId",
@@ -48,7 +50,7 @@ function NoteDetail() {
         { label: note.title },
       ]
     : [
-        { label: "Notes", to: "/notes" },
+        { label: t("nav.notes"), to: "/notes" },
         { label: note?.title ?? "…" },
       ];
 
@@ -81,7 +83,7 @@ function NoteDetail() {
     return (
       <div className="flex h-full flex-col gap-6 p-8">
         <Breadcrumb items={items} />
-        <p className="text-sm text-muted-foreground">Loading note…</p>
+        <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
       </div>
     );
   }
@@ -94,7 +96,7 @@ function NoteDetail() {
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Note title"
+          placeholder={t("fields.title")}
           className="flex-1 text-xl font-semibold"
         />
         <div className="flex items-center gap-2">
@@ -102,26 +104,26 @@ function NoteDetail() {
             type="button"
             variant="ghost"
             onClick={handleDelete}
-            aria-label="Delete note"
+            aria-label={t("notes.deleteAria")}
           >
             <Trash2 />
-            Delete
+            {t("common.delete")}
           </Button>
           <Button type="button" onClick={handleSave} disabled={!canSave}>
             <Save />
-            {update.isPending ? "Saving…" : "Save"}
+            {t(update.isPending ? "common.saving" : "common.save")}
           </Button>
         </div>
       </header>
 
       <RichTextField
-        label="Body"
+        label={t("fields.body")}
         value={body}
         onChange={setBody}
         format={bodyFormat}
         onFormatChange={setBodyFormat}
-        placeholder="Write your note here…"
-        emptyLabel="Empty note — click to start writing."
+        placeholder={t("notes.bodyPlaceholder")}
+        emptyLabel={t("notes.emptyBody")}
       />
     </div>
   );

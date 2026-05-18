@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import {
   ChevronRight,
   ListTree,
@@ -64,6 +65,7 @@ export const Route = createFileRoute(
 });
 
 function TaskDetail() {
+  const { t } = useTranslation();
   const { projectId, storyId, taskId } = Route.useParams();
   const navigate = useNavigate();
 
@@ -100,7 +102,7 @@ function TaskDetail() {
   const subtasks = (storyTasks ?? []).filter((t) => t.parentTaskId === taskId);
 
   const items: BreadcrumbItem[] = [
-    { label: "Projects", to: "/" },
+    { label: t("nav.projects"), to: "/" },
     {
       label: project?.title ?? "…",
       to: "/projects/$projectId",
@@ -150,7 +152,7 @@ function TaskDetail() {
     if (!task) return;
     const created = await create.mutateAsync({
       storyId,
-      title: "Untitled subtask",
+      title: t("common.untitledSubtask"),
       description: "",
       descriptionFormat: "plaintext",
       parentTaskId: task.id,
@@ -165,7 +167,7 @@ function TaskDetail() {
     return (
       <div className="flex h-full flex-col gap-6 p-8">
         <Breadcrumb items={items} />
-        <p className="text-sm text-muted-foreground">Loading task…</p>
+        <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
       </div>
     );
   }
@@ -179,7 +181,7 @@ function TaskDetail() {
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Task title"
+          placeholder={t("fields.title")}
           className="flex-1 text-xl font-semibold"
         />
         <div className="flex items-center gap-2">
@@ -187,27 +189,27 @@ function TaskDetail() {
             type="button"
             variant="ghost"
             onClick={handleDelete}
-            aria-label="Delete task"
+            aria-label={t("tasks.deleteAria")}
           >
             <Trash2 />
-            Delete
+            {t("common.delete")}
           </Button>
           <Button type="button" onClick={handleSave} disabled={!canSave}>
             <Save />
-            {update.isPending ? "Saving…" : "Save"}
+            {t(update.isPending ? "common.saving" : "common.save")}
           </Button>
         </div>
       </header>
 
       <div className="flex flex-col gap-4">
         <RichTextField
-          label="Description"
+          label={t("fields.description")}
           value={description}
           onChange={setDescription}
           format={descriptionFormat}
           onFormatChange={setDescriptionFormat}
-          placeholder="Add context, requirements, references…"
-          emptyLabel="No description yet — click to add one."
+          placeholder={t("tasks.descriptionPlaceholder")}
+          emptyLabel={t("tasks.emptyDescription")}
         />
 
         <SubtasksSection
@@ -238,17 +240,17 @@ function TaskDetail() {
         />
 
         <RichTextField
-          label="Result / notes"
+          label={t("fields.result")}
           value={result}
           onChange={setResult}
           format={resultFormat}
           onFormatChange={setResultFormat}
-          placeholder="Outcomes, conclusions, follow-ups…"
-          emptyLabel="No result yet — click to add one."
+          placeholder={t("tasks.resultPlaceholder")}
+          emptyLabel={t("tasks.emptyResult")}
         />
 
         <div className="flex flex-wrap gap-4">
-          <Field label="Status">
+          <Field label={t("fields.status")}>
             <Select
               value={status}
               onValueChange={(v) => setStatus(v as TaskStatus)}
@@ -259,14 +261,14 @@ function TaskDetail() {
               <SelectContent>
                 {STATUSES.map((s) => (
                   <SelectItem key={s} value={s}>
-                    {s.replace("_", " ")}
+                    {t(`status.${s}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </Field>
 
-          <Field label="Due date">
+          <Field label={t("fields.dueDate")}>
             <Input
               type="date"
               value={dueDate}
@@ -283,6 +285,7 @@ function TaskDetail() {
 }
 
 function CommentsSection({ taskId }: { taskId: string }) {
+  const { t } = useTranslation();
   const { data: comments } = useComments(taskId);
   const create = useCreateComment(taskId);
   const remove = useDeleteComment(taskId);
@@ -304,11 +307,11 @@ function CommentsSection({ taskId }: { taskId: string }) {
 
   return (
     <section className="flex flex-col gap-3 border-t border-border pt-4">
-      <h3 className="text-sm font-semibold">Comments</h3>
+      <h3 className="text-sm font-semibold">{t("comments.heading")}</h3>
 
       {(comments ?? []).length === 0 ? (
         <p className="rounded-md border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-          No comments yet. Use this for follow-ups, decisions, or quick notes.
+          {t("comments.empty")}
         </p>
       ) : (
         <ul className="flex flex-col gap-2">
@@ -328,7 +331,7 @@ function CommentsSection({ taskId }: { taskId: string }) {
           onChange={setBody}
           format={format}
           onFormatChange={setFormat}
-          placeholder="Write a comment…"
+          placeholder={t("comments.placeholder")}
           minHeight={120}
         />
         <div className="flex justify-end">
@@ -339,7 +342,7 @@ function CommentsSection({ taskId }: { taskId: string }) {
             disabled={!canSubmit}
           >
             <Plus />
-            {create.isPending ? "Posting…" : "Post comment"}
+            {t(create.isPending ? "comments.posting" : "comments.post")}
           </Button>
         </div>
       </div>
@@ -354,6 +357,7 @@ function CommentRow({
   comment: Comment;
   onDelete: () => void;
 }) {
+  const { t } = useTranslation();
   const html = renderField(comment.body, comment.bodyFormat);
   return (
     <li className="group rounded-md border border-border bg-background p-3">
@@ -367,7 +371,7 @@ function CommentRow({
           variant="ghost"
           className="opacity-0 transition-opacity group-hover:opacity-100"
           onClick={onDelete}
-          aria-label="Delete comment"
+          aria-label={t("comments.deleteAria")}
         >
           <Trash2 />
         </Button>
@@ -395,61 +399,62 @@ function SubtasksSection({
   onToggle: (t: Task) => void;
   onDelete: (id: string) => void;
 }) {
+  const { t } = useTranslation();
   const [yellowDays] = useYellowDays();
   const childCount = (id: string) =>
-    storyTasks.filter((t) => t.parentTaskId === id).length;
+    storyTasks.filter((task) => task.parentTaskId === id).length;
 
   return (
     <section className="flex flex-col gap-2 border-t border-border pt-4">
       <header className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Subtasks</h3>
+        <h3 className="text-sm font-semibold">{t("fields.subtasks")}</h3>
         <Button type="button" size="sm" variant="outline" onClick={onAdd}>
           <Plus />
-          Add subtask
+          {t("tasks.addSubtask")}
         </Button>
       </header>
 
       {subtasks.length === 0 ? (
         <p className="rounded-md border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-          No subtasks yet — break this task down with "Add subtask".
+          {t("tasks.noSubtasks")}
         </p>
       ) : (
         <ul className="flex flex-col gap-1">
-          {subtasks.map((s) => (
+          {subtasks.map((sub) => (
             <li
-              key={s.id}
+              key={sub.id}
               className={cn(
                 "group flex items-center gap-2 rounded-md border border-border bg-background p-2",
-                DEADLINE_BORDER[getDeadlineStatus(s.dueDate, s.status, yellowDays)],
+                DEADLINE_BORDER[getDeadlineStatus(sub.dueDate, sub.status, yellowDays)],
               )}
             >
               <Button
                 type="button"
                 size="icon"
                 variant="ghost"
-                onClick={() => onToggle(s)}
-                aria-label="Toggle status"
+                onClick={() => onToggle(sub)}
+                aria-label={t("tasks.toggleStatusAria")}
               >
-                <StatusIcon status={s.status} />
+                <StatusIcon status={sub.status} />
               </Button>
               <button
                 type="button"
-                onClick={() => onOpen(s.id)}
+                onClick={() => onOpen(sub.id)}
                 className="flex flex-1 items-center gap-2 text-left text-sm"
               >
                 <span
-                  className={s.status === "done" ? "line-through opacity-60" : ""}
+                  className={sub.status === "done" ? "line-through opacity-60" : ""}
                 >
-                  {s.title}
+                  {sub.title}
                 </span>
-                {childCount(s.id) > 0 && (
+                {childCount(sub.id) > 0 && (
                   <span className="flex items-center gap-0.5 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                     <ListTree size={10} />
-                    {childCount(s.id)}
+                    {childCount(sub.id)}
                   </span>
                 )}
                 <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
-                  Open
+                  {t("common.open")}
                   <ChevronRight size={12} />
                 </span>
               </button>
@@ -458,8 +463,8 @@ function SubtasksSection({
                 size="icon"
                 variant="ghost"
                 className="opacity-0 transition-opacity group-hover:opacity-100"
-                onClick={() => onDelete(s.id)}
-                aria-label="Delete subtask"
+                onClick={() => onDelete(sub.id)}
+                aria-label={t("tasks.deleteSubtaskAria")}
               >
                 <Trash2 />
               </Button>

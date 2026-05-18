@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Eye, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SplitEditor } from "@/components/editor/split-editor";
@@ -22,6 +23,7 @@ export function RichTextField({
   placeholder?: string;
   emptyLabel?: string;
 }) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const rendered = useMemo(() => renderField(value, format), [value, format]);
 
@@ -36,7 +38,7 @@ export function RichTextField({
           onClick={() => setEditing((v) => !v)}
         >
           {editing ? <Eye /> : <Pencil />}
-          {editing ? "Preview" : "Edit"}
+          {t(editing ? "common.preview" : "common.edit")}
         </Button>
       </div>
 
@@ -59,7 +61,7 @@ export function RichTextField({
           onClick={() => setEditing(true)}
           className="rounded-md border border-dashed border-border p-4 text-center text-xs text-muted-foreground hover:border-border/80 hover:text-foreground"
         >
-          {emptyLabel ?? "Empty — click to add content."}
+          {emptyLabel ?? t("common.empty")}
         </button>
       )}
     </div>

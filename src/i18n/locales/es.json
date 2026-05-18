@@ -1,0 +1,195 @@
+{
+  "common": {
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "cancel": "Cancelar",
+    "delete": "Borrar",
+    "create": "Crear",
+    "creating": "Creando…",
+    "edit": "Editar",
+    "preview": "Vista previa",
+    "open": "Abrir",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "loading": "Cargando…",
+    "untitled": "Sin título",
+    "untitledProject": "Proyecto sin título",
+    "untitledStory": "Story sin título",
+    "untitledTask": "Tarea sin título",
+    "untitledSubtask": "Subtarea sin título",
+    "untitledNote": "Nota sin título",
+    "empty": "Vacío — clic para agregar contenido."
+  },
+  "nav": {
+    "tagline": "Gestor de tareas local-first",
+    "projects": "Proyectos",
+    "notes": "Notas",
+    "system": "Sistema",
+    "settings": "Ajustes",
+    "about": "Acerca de",
+    "hideSidebar": "Ocultar barra lateral",
+    "showSidebar": "Mostrar barra lateral"
+  },
+  "titleBar": {
+    "minimize": "Minimizar",
+    "maximize": "Maximizar",
+    "restore": "Restaurar",
+    "close": "Cerrar"
+  },
+  "status": {
+    "todo": "por hacer",
+    "in_progress": "en progreso",
+    "done": "hecho",
+    "blocked": "bloqueado",
+    "cancelled": "cancelado"
+  },
+  "format": {
+    "markdown": "markdown",
+    "plaintext": "texto plano",
+    "html": "html",
+    "latex": "latex"
+  },
+  "fields": {
+    "title": "Título",
+    "description": "Descripción",
+    "body": "Cuerpo",
+    "result": "Resultado / notas",
+    "status": "Estado",
+    "dueDate": "Fecha límite",
+    "comments": "Comentarios",
+    "subtasks": "Subtareas",
+    "tasks": "Tareas",
+    "stories": "Stories"
+  },
+  "timeline": {
+    "started": "Iniciada",
+    "completed": "Finalizada"
+  },
+  "projects": {
+    "indexHeading": "Proyectos",
+    "indexSubtitle": "Espacios de trabajo de nivel superior para tus tareas",
+    "newProject": "Nuevo proyecto",
+    "emptyTitle": "Aún no tenés proyectos",
+    "emptyHelp": "Creá tu primer proyecto para empezar a registrar stories y tareas.",
+    "boardButton": "Tablero",
+    "deleteAria": "Borrar proyecto",
+    "addStory": "Agregar story",
+    "noStories": "Aún no hay stories — agrupá tareas relacionadas con \"Agregar story\".",
+    "addNote": "Agregar nota",
+    "noNotes": "Este proyecto aún no tiene notas adjuntas.",
+    "deleteNoteAria": "Borrar nota",
+    "deleteStoryAria": "Borrar story",
+    "descriptionPlaceholder": "Objetivos, alcance, referencias…",
+    "emptyDescription": "Aún no hay descripción — clic para agregarla."
+  },
+  "stories": {
+    "addTask": "Agregar tarea",
+    "noTasks": "Aún no hay tareas — desglosá esta story con \"Agregar tarea\".",
+    "deleteAria": "Borrar story",
+    "deleteTaskAria": "Borrar tarea",
+    "descriptionPlaceholder": "Contexto, objetivos, referencias…",
+    "emptyDescription": "Aún no hay descripción — clic para agregarla."
+  },
+  "tasks": {
+    "addSubtask": "Agregar subtarea",
+    "noSubtasks": "Aún no hay subtareas — desglosá esta tarea con \"Agregar subtarea\".",
+    "deleteAria": "Borrar tarea",
+    "deleteSubtaskAria": "Borrar subtarea",
+    "descriptionPlaceholder": "Agregá contexto, requisitos, referencias…",
+    "emptyDescription": "Aún no hay descripción — clic para agregarla.",
+    "resultPlaceholder": "Resultados, conclusiones, próximos pasos…",
+    "emptyResult": "Aún no hay resultado — clic para agregarlo.",
+    "toggleStatusAria": "Cambiar estado"
+  },
+  "comments": {
+    "heading": "Comentarios",
+    "empty": "Aún no hay comentarios. Usá esto para seguimientos, decisiones o notas rápidas.",
+    "placeholder": "Escribí un comentario…",
+    "post": "Publicar comentario",
+    "posting": "Publicando…",
+    "deleteAria": "Borrar comentario"
+  },
+  "notes": {
+    "indexHeading": "Notas",
+    "indexSubtitle": "Notas independientes, sin vínculo con proyectos ni tareas.",
+    "newNote": "Nueva nota",
+    "emptyTitle": "Aún no tenés notas",
+    "emptyHelp": "Las notas viven fuera de la jerarquía de proyectos — usalas para pensamientos rápidos, referencias o contexto puntual.",
+    "bodyPlaceholder": "Escribí tu nota acá…",
+    "emptyBody": "Nota vacía — clic para empezar a escribir.",
+    "deleteAria": "Borrar nota"
+  },
+  "board": {
+    "subtitle": "Todas las stories, tareas y subtareas del proyecto agrupadas por estado.",
+    "headingSuffix": "Tablero",
+    "emptyState": "Nada para mostrar todavía — creá stories y tareas primero.",
+    "loading": "Cargando tablero…",
+    "typeStory": "Story",
+    "typeTask": "Tarea",
+    "typeSubtask": "Subtarea"
+  },
+  "settings": {
+    "heading": "Ajustes",
+    "subtitle": "Identidad del dispositivo, peers vinculados y preferencias van a vivir acá.",
+    "language": {
+      "heading": "Idioma",
+      "description": "Elegí el idioma que usa la aplicación.",
+      "english": "English",
+      "spanish": "Español"
+    },
+    "deadlines": {
+      "heading": "Fechas límite",
+      "description": "Las stories y tareas que aún no estén terminadas muestran un borde izquierdo de color en la tarjeta según cuán cerca esté la fecha límite. Pasado el límite es rojo, dentro del umbral de abajo es amarillo, si no verde.",
+      "warnBefore": "Avisar antes de:",
+      "days": "día(s) del vencimiento"
+    },
+    "mcp": {
+      "heading": "Servidor MCP (para agentes)",
+      "running": "Activo",
+      "stopped": "Detenido",
+      "description": "Exponé los datos de esta app sobre un servidor Model Context Protocol local para que un agente de IA pueda leer y (opcionalmente) modificar tus tareas. Desactivado por defecto por seguridad. El servidor solo escucha en 127.0.0.1, no es accesible desde la red.",
+      "modeOff": "Desactivado",
+      "modeOffDescription": "Sin servidor MCP. Los agentes no pueden conectarse.",
+      "modeReadonly": "Solo lectura",
+      "modeReadonlyDescription": "Los agentes pueden listar y consultar datos pero no crear, modificar ni borrar nada.",
+      "modeFull": "Acceso completo",
+      "modeFullDescription": "Los agentes pueden crear, modificar y borrar proyectos, stories, tareas y comentarios.",
+      "copyEndpoint": "Copiar URL del endpoint",
+      "failed": "No se pudo aplicar"
+    },
+    "application": {
+      "heading": "Aplicación",
+      "description": "Cerrar la ventana con la X minimiza Organizer a la bandeja del sistema. Usá esto para cerrarla del todo.",
+      "quit": "Cerrar Organizer"
+    },
+    "dangerZone": {
+      "heading": "Zona peligrosa",
+      "description": "Borra permanentemente todos los proyectos, stories, tareas, comentarios y peers vinculados. No se puede deshacer.",
+      "resetButton": "Reiniciar base de datos",
+      "dialogTitle": "Reiniciar base de datos",
+      "dialogDescription": "Se borran todos los datos de este dispositivo: proyectos, stories, tareas, comentarios, estado de sync. Es irreversible. Escribí {{token}} abajo para confirmar.",
+      "confirmPlaceholder": "Escribí RESET para confirmar",
+      "confirmButton": "Borrar todo",
+      "wiping": "Borrando…",
+      "done": "Base de datos borrada. Volviendo a proyectos…",
+      "failed": "Falló"
+    }
+  },
+  "systemCheck": {
+    "heading": "Diagnóstico del sistema",
+    "subtitle": "Herramientas opcionales que habilitan funciones extra. Todas son opt-in — la app funciona bien sin ellas.",
+    "loading": "Detectando sistema…",
+    "failed": "No se pudo detectar el sistema",
+    "detectedPlatform": "Plataforma detectada",
+    "copyAria": "Copiar comando de instalación"
+  },
+  "about": {
+    "heading": "Acerca de",
+    "description": "Una herramienta simple que ayuda a organizar tareas, proyectos y a llevar el seguimiento de cosas con notas.",
+    "version": "Versión",
+    "labelAuthor": "Autor",
+    "labelStack": "Stack",
+    "labelLicense": "Licencia",
+    "licenseDescription": "PolyForm Noncommercial 1.0.0 — libre para uso personal / no comercial. El uso comercial requiere licencia separada; contactá a"
+  }
+}

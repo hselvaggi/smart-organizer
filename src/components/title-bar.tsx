@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
   Maximize2,
@@ -12,6 +13,7 @@ import { useUiStore } from "@/lib/store/ui";
 
 export function TitleBar() {
   const win = getCurrentWindow();
+  const { t } = useTranslation();
   const [maximized, setMaximized] = useState(false);
   const sidebarCollapsed = useUiStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
@@ -34,7 +36,7 @@ export function TitleBar() {
       <div className="flex items-center gap-1">
         <TitleBarButton
           onClick={toggleSidebar}
-          label={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
+          label={t(sidebarCollapsed ? "nav.showSidebar" : "nav.hideSidebar")}
         >
           {sidebarCollapsed ? (
             <PanelLeftOpen size={14} />
@@ -50,18 +52,21 @@ export function TitleBar() {
         </span>
       </div>
       <div className="flex items-center">
-        <TitleBarButton onClick={() => win.minimize()} label="Minimize">
+        <TitleBarButton
+          onClick={() => win.minimize()}
+          label={t("titleBar.minimize")}
+        >
           <Minus size={14} />
         </TitleBarButton>
         <TitleBarButton
           onClick={() => win.toggleMaximize()}
-          label={maximized ? "Restore" : "Maximize"}
+          label={t(maximized ? "titleBar.restore" : "titleBar.maximize")}
         >
           {maximized ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
         </TitleBarButton>
         <TitleBarButton
           onClick={() => win.close()}
-          label="Close"
+          label={t("titleBar.close")}
           danger
         >
           <X size={14} />

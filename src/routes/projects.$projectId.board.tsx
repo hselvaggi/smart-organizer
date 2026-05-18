@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   DndContext,
@@ -28,12 +29,12 @@ import { useUpdateTask } from "@/lib/queries/tasks";
 import { api } from "@/lib/tauri";
 import type { Story, Task, TaskStatus } from "@/types/generated";
 
-const COLUMNS: { status: TaskStatus; label: string }[] = [
-  { status: "todo", label: "Todo" },
-  { status: "in_progress", label: "In progress" },
-  { status: "done", label: "Done" },
-  { status: "blocked", label: "Blocked" },
-  { status: "cancelled", label: "Cancelled" },
+const COLUMN_STATUSES: TaskStatus[] = [
+  "todo",
+  "in_progress",
+  "done",
+  "blocked",
+  "cancelled",
 ];
 
 type StoryCard = { kind: "story"; item: Story };
@@ -45,6 +46,7 @@ export const Route = createFileRoute("/projects/$projectId/board")({
 });
 
 function ProjectBoard() {
+  const { t } = useTranslation();
   const { projectId } = Route.useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -115,13 +117,13 @@ function ProjectBoard() {
   };
 
   const items: BreadcrumbItem[] = [
-    { label: "Projects", to: "/" },
+    { label: t("nav.projects"), to: "/" },
     {
       label: project?.title ?? "…",
       to: "/projects/$projectId",
       params: { projectId },
     },
-    { label: "Board" },
+    { label: t("board.headingSuffix") },
   ];
 
   const cards: Card[] = board
@@ -183,21 +185,18 @@ function ProjectBoard() {
       <Breadcrumb items={items} />
       <header>
         <h2 className="text-xl font-semibold tracking-tight">
-          {project?.title ?? "Loading…"} · Board
+          {project?.title ?? t("common.loading")} · {t("board.headingSuffix")}
         </h2>
-        <p className="text-sm text-muted-foreground">
-          All stories, tasks and subtasks across this project grouped by
-          status.
-        </p>
+        <p className="text-sm text-muted-foreground">{t("board.subtitle")}</p>
       </header>
 
       {isLoading && (
-        <p className="text-sm text-muted-foreground">Loading board…</p>
+        <p className="text-sm text-muted-foreground">{t("board.loading")}</p>
       )}
 
       {board && cards.length === 0 && (
         <p className="text-sm text-muted-foreground">
-          Nothing to show yet — create stories and tasks first.
+          {t("board.emptyState")}
         </p>
       )}
 
@@ -209,12 +208,12 @@ function ProjectBoard() {
           onDragCancel={() => setActiveCard(null)}
         >
           <div className="grid min-h-0 flex-1 grid-cols-5 gap-3 overflow-x-auto">
-            {COLUMNS.map((col) => (
+            {COLUMN_STATUSES.map((status) => (
               <Column
-                key={col.status}
-                label={col.label}
-                status={col.status}
-                cards={cardsByStatus(col.status)}
+                key={status}
+                label={t(`status.${status}`)}
+                status={status}
+                cards={cardsByStatus(status)}
                 onOpen={handleOpen}
                 onToggle={handleToggle}
               />
@@ -282,10 +281,13 @@ function CardItem({
   onOpen: () => void;
   onToggle: () => void;
 }) {
+  const { t } = useTranslation();
   const item = card.item;
   const isStory = card.kind === "story";
   const isSubtask = card.kind === "task" && !!(item as Task).parentTaskId;
-  const typeLabel = isStory ? "Story" : isSubtask ? "Subtask" : "Task";
+  const typeLabel = t(
+    isStory ? "board.typeStory" : isSubtask ? "board.typeSubtask" : "board.typeTask",
+  );
   const Icon = isStory ? BookOpen : ListTree;
 
   const preview = item.description
@@ -316,7 +318,7 @@ function CardItem({
           size="icon"
           variant="ghost"
           onClick={onToggle}
-          aria-label="Toggle status"
+          aria-label={t("tasks.toggleStatusAria")}
         >
           <StatusIcon status={item.status} />
         </Button>
@@ -353,10 +355,13 @@ function CardItem({
 }
 
 function CardPreview({ card }: { card: Card }) {
+  const { t } = useTranslation();
   const item = card.item;
   const isStory = card.kind === "story";
   const isSubtask = card.kind === "task" && !!(item as Task).parentTaskId;
-  const typeLabel = isStory ? "Story" : isSubtask ? "Subtask" : "Task";
+  const typeLabel = t(
+    isStory ? "board.typeStory" : isSubtask ? "board.typeSubtask" : "board.typeTask",
+  );
   const Icon = isStory ? BookOpen : ListTree;
 
   const preview = item.description

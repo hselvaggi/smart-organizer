@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { CalendarCheck, CalendarClock } from "lucide-react";
 
 export function Timeline({
@@ -7,15 +8,16 @@ export function Timeline({
   startedAt: string | null;
   completedAt: string | null;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
       <span className="flex items-center gap-1.5">
         <CalendarClock size={12} />
-        Started: {fmt(startedAt)}
+        {t("timeline.started")}: {fmt(startedAt)}
       </span>
       <span className="flex items-center gap-1.5">
         <CalendarCheck size={12} />
-        Completed: {fmt(completedAt)}
+        {t("timeline.completed")}: {fmt(completedAt)}
       </span>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import {
   AlertTriangle,
   Bot,
@@ -8,11 +9,19 @@ import {
   Check,
   Circle,
   Copy,
+  Languages,
   Power,
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useYellowDays } from "@/lib/deadline";
 import {
   Dialog,
@@ -23,6 +32,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/cn";
+import { SUPPORTED_LOCALES, type Locale } from "@/i18n";
 import { api } from "@/lib/tauri";
 import type { McpMode } from "@/types/generated";
 
@@ -31,15 +41,17 @@ export const Route = createFileRoute("/settings")({
 });
 
 function SettingsPage() {
+  const { t } = useTranslation();
   return (
     <div className="flex h-full flex-col gap-6 overflow-y-auto p-8">
       <header>
-        <h2 className="text-xl font-semibold tracking-tight">Settings</h2>
-        <p className="text-sm text-muted-foreground">
-          Device identity, paired peers and preferences will live here.
-        </p>
+        <h2 className="text-xl font-semibold tracking-tight">
+          {t("settings.heading")}
+        </h2>
+        <p className="text-sm text-muted-foreground">{t("settings.subtitle")}</p>
       </header>
 
+      <LanguageSection />
       <DeadlinesSection />
       <McpSection />
       <ApplicationSection />
@@ -48,21 +60,59 @@ function SettingsPage() {
   );
 }
 
+function LanguageSection() {
+  const { t, i18n } = useTranslation();
+  const current = (i18n.resolvedLanguage ?? "en") as Locale;
+
+  return (
+    <section className="flex max-w-2xl flex-col gap-3 rounded-md border border-border bg-card/40 p-4">
+      <header className="flex items-center gap-2">
+        <Languages size={16} className="text-muted-foreground" />
+        <h3 className="text-sm font-semibold">
+          {t("settings.language.heading")}
+        </h3>
+      </header>
+      <p className="text-xs text-muted-foreground">
+        {t("settings.language.description")}
+      </p>
+      <Select
+        value={current}
+        onValueChange={(v) => i18n.changeLanguage(v as Locale)}
+      >
+        <SelectTrigger className="w-48">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {SUPPORTED_LOCALES.map((loc) => (
+            <SelectItem key={loc} value={loc}>
+              {loc === "en"
+                ? t("settings.language.english")
+                : t("settings.language.spanish")}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </section>
+  );
+}
+
 function ApplicationSection() {
+  const { t } = useTranslation();
   return (
     <section className="flex max-w-2xl flex-col gap-3 rounded-md border border-border bg-card/40 p-4">
       <header className="flex items-center gap-2">
         <Power size={16} className="text-muted-foreground" />
-        <h3 className="text-sm font-semibold">Application</h3>
+        <h3 className="text-sm font-semibold">
+          {t("settings.application.heading")}
+        </h3>
       </header>
       <p className="text-xs text-muted-foreground">
-        Closing the window via the X minimises Organizer to the tray. Use
-        this to actually shut it down.
+        {t("settings.application.description")}
       </p>
       <div>
         <Button type="button" variant="outline" onClick={() => api.quitApp()}>
           <Power />
-          Quit Organizer
+          {t("settings.application.quit")}
         </Button>
       </div>
     </section>
@@ -70,21 +120,22 @@ function ApplicationSection() {
 }
 
 function DeadlinesSection() {
+  const { t } = useTranslation();
   const [yellowDays, setYellowDays] = useYellowDays();
 
   return (
     <section className="flex max-w-2xl flex-col gap-3 rounded-md border border-border bg-card/40 p-4">
       <header className="flex items-center gap-2">
         <CalendarClock size={16} className="text-muted-foreground" />
-        <h3 className="text-sm font-semibold">Deadlines</h3>
+        <h3 className="text-sm font-semibold">
+          {t("settings.deadlines.heading")}
+        </h3>
       </header>
       <p className="text-xs text-muted-foreground">
-        Stories and tasks that are not yet done show a coloured left border on
-        their card based on how close the due date is. Past due is red, within
-        the threshold below is yellow, otherwise green.
+        {t("settings.deadlines.description")}
       </p>
       <label className="flex items-center gap-3">
-        <span className="text-sm">Warn before:</span>
+        <span className="text-sm">{t("settings.deadlines.warnBefore")}</span>
         <Input
           type="number"
           min={0}
@@ -96,33 +147,38 @@ function DeadlinesSection() {
           }}
           className="w-24"
         />
-        <span className="text-sm text-muted-foreground">day(s) of due date</span>
+        <span className="text-sm text-muted-foreground">
+          {t("settings.deadlines.days")}
+        </span>
       </label>
     </section>
   );
 }
 
-const MODE_OPTIONS: { value: McpMode; label: string; description: string }[] = [
-  {
-    value: "off",
-    label: "Off",
-    description: "No MCP server. Agents cannot connect.",
-  },
-  {
-    value: "readonly",
-    label: "Read-only",
-    description:
-      "Agents can list and inspect data but not create, update or delete anything.",
-  },
-  {
-    value: "full",
-    label: "Full access",
-    description:
-      "Agents can create, update and delete projects, stories, tasks and comments.",
-  },
-];
+function useModeOptions() {
+  const { t } = useTranslation();
+  const options: { value: McpMode; label: string; description: string }[] = [
+    {
+      value: "off",
+      label: t("settings.mcp.modeOff"),
+      description: t("settings.mcp.modeOffDescription"),
+    },
+    {
+      value: "readonly",
+      label: t("settings.mcp.modeReadonly"),
+      description: t("settings.mcp.modeReadonlyDescription"),
+    },
+    {
+      value: "full",
+      label: t("settings.mcp.modeFull"),
+      description: t("settings.mcp.modeFullDescription"),
+    },
+  ];
+  return options;
+}
 
 function McpSection() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const { data: status } = useQuery({
     queryKey: ["mcp-status"],
@@ -135,6 +191,7 @@ function McpSection() {
     },
   });
   const [copied, setCopied] = useState(false);
+  const modeOptions = useModeOptions();
 
   const handleCopy = async (text: string) => {
     try {
@@ -153,7 +210,7 @@ function McpSection() {
     <section className="flex max-w-2xl flex-col gap-4 rounded-md border border-border bg-card/40 p-4">
       <header className="flex items-center gap-2">
         <Bot size={16} className="text-muted-foreground" />
-        <h3 className="text-sm font-semibold">MCP server (for agents)</h3>
+        <h3 className="text-sm font-semibold">{t("settings.mcp.heading")}</h3>
         <span
           className={cn(
             "ml-auto flex items-center gap-1.5 rounded px-2 py-0.5 text-[11px] font-medium",
@@ -168,20 +225,16 @@ function McpSection() {
               running ? "fill-emerald-400 text-emerald-400" : "fill-current"
             }
           />
-          {running ? "Running" : "Stopped"}
+          {t(running ? "settings.mcp.running" : "settings.mcp.stopped")}
         </span>
       </header>
 
       <p className="text-xs text-muted-foreground">
-        Expose this app's data over a local Model Context Protocol server so
-        an AI agent can read and (optionally) modify your tasks. Disabled by
-        default for security. The server only binds to{" "}
-        <code className="rounded bg-muted px-1 font-mono">127.0.0.1</code> so
-        it is not reachable from the network.
+        {t("settings.mcp.description")}
       </p>
 
       <div className="flex flex-col gap-2">
-        {MODE_OPTIONS.map((opt) => (
+        {modeOptions.map((opt) => (
           <label
             key={opt.value}
             className={cn(
@@ -217,17 +270,17 @@ function McpSection() {
             size="sm"
             variant="ghost"
             onClick={() => handleCopy(status.url)}
-            aria-label="Copy endpoint URL"
+            aria-label={t("settings.mcp.copyEndpoint")}
           >
             {copied ? <Check /> : <Copy />}
-            {copied ? "Copied" : "Copy"}
+            {t(copied ? "common.copied" : "common.copy")}
           </Button>
         </div>
       )}
 
       {setMode.error && (
         <p className="text-xs text-destructive">
-          Failed to apply: {String(setMode.error)}
+          {t("settings.mcp.failed")}: {String(setMode.error)}
         </p>
       )}
     </section>
@@ -235,6 +288,7 @@ function McpSection() {
 }
 
 function DangerZone() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -261,11 +315,12 @@ function DangerZone() {
     <section className="flex max-w-2xl flex-col gap-3 rounded-md border border-destructive/40 bg-destructive/5 p-4">
       <header className="flex items-center gap-2">
         <AlertTriangle size={16} className="text-destructive" />
-        <h3 className="text-sm font-semibold">Danger zone</h3>
+        <h3 className="text-sm font-semibold">
+          {t("settings.dangerZone.heading")}
+        </h3>
       </header>
       <p className="text-xs text-muted-foreground">
-        Permanently delete all projects, stories, tasks, comments and paired
-        peers. This cannot be undone.
+        {t("settings.dangerZone.description")}
       </p>
       <div>
         <Button
@@ -274,7 +329,7 @@ function DangerZone() {
           onClick={() => setOpen(true)}
         >
           <Trash2 />
-          Reset database
+          {t("settings.dangerZone.resetButton")}
         </Button>
       </div>
 
@@ -283,35 +338,32 @@ function DangerZone() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle size={16} className="text-destructive" />
-              Reset database
+              {t("settings.dangerZone.dialogTitle")}
             </DialogTitle>
             <DialogDescription>
-              All data on this device will be wiped: projects, stories, tasks,
-              comments, sync state. This is irreversible. Type{" "}
-              <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
-                RESET
-              </code>{" "}
-              below to confirm.
+              {t("settings.dangerZone.dialogDescription", {
+                token: "RESET",
+              })}
             </DialogDescription>
           </DialogHeader>
 
           {done ? (
             <div className="flex items-center gap-2 rounded-md border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm text-emerald-300">
               <Check size={16} />
-              Database wiped. Returning to projects…
+              {t("settings.dangerZone.done")}
             </div>
           ) : (
             <>
               <Input
                 value={confirmation}
                 onChange={(e) => setConfirmation(e.target.value)}
-                placeholder="Type RESET to confirm"
+                placeholder={t("settings.dangerZone.confirmPlaceholder")}
                 autoFocus
                 disabled={reset.isPending}
               />
               {reset.error && (
                 <p className="text-xs text-destructive">
-                  Failed: {String(reset.error)}
+                  {t("settings.dangerZone.failed")}: {String(reset.error)}
                 </p>
               )}
             </>
@@ -324,7 +376,7 @@ function DangerZone() {
               onClick={() => setOpen(false)}
               disabled={reset.isPending}
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               type="button"
@@ -333,7 +385,9 @@ function DangerZone() {
               disabled={!canConfirm || done}
             >
               <Trash2 />
-              {reset.isPending ? "Wiping…" : "Reset everything"}
+              {reset.isPending
+                ? t("settings.dangerZone.wiping")
+                : t("settings.dangerZone.confirmButton")}
             </Button>
           </DialogFooter>
         </DialogContent>

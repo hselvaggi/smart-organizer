@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import {
   BookOpen,
   ChevronRight,
@@ -44,6 +45,7 @@ export const Route = createFileRoute("/projects/$projectId/")({
 });
 
 function ProjectDetail() {
+  const { t } = useTranslation();
   const { projectId } = Route.useParams();
   const navigate = useNavigate();
 
@@ -72,7 +74,7 @@ function ProjectDetail() {
   }, [project]);
 
   const items: BreadcrumbItem[] = [
-    { label: "Projects", to: "/" },
+    { label: t("nav.projects"), to: "/" },
     { label: project?.title ?? "…" },
   ];
 
@@ -97,7 +99,7 @@ function ProjectDetail() {
   const handleAddStory = async () => {
     const created = await createStory.mutateAsync({
       projectId,
-      title: "Untitled story",
+      title: t("common.untitledStory"),
       description: "",
       descriptionFormat: "plaintext",
     });
@@ -110,7 +112,7 @@ function ProjectDetail() {
   const handleAddNote = async () => {
     const created = await createNote.mutateAsync({
       projectId,
-      title: "Untitled note",
+      title: t("common.untitledNote"),
       body: "",
       bodyFormat: "plaintext",
     });
@@ -121,7 +123,7 @@ function ProjectDetail() {
     return (
       <div className="flex h-full flex-col gap-6 p-8">
         <Breadcrumb items={items} />
-        <p className="text-sm text-muted-foreground">Loading project…</p>
+        <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
       </div>
     );
   }
@@ -134,7 +136,7 @@ function ProjectDetail() {
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Project title"
+          placeholder={t("fields.title")}
           className="flex-1 text-xl font-semibold"
         />
         <div className="flex items-center gap-2">
@@ -149,33 +151,33 @@ function ProjectDetail() {
             }
           >
             <LayoutGrid />
-            Board
+            {t("projects.boardButton")}
           </Button>
           <Button
             type="button"
             variant="ghost"
             onClick={handleDelete}
-            aria-label="Delete project"
+            aria-label={t("projects.deleteAria")}
           >
             <Trash2 />
-            Delete
+            {t("common.delete")}
           </Button>
           <Button type="button" onClick={handleSave} disabled={!canSave}>
             <Save />
-            {update.isPending ? "Saving…" : "Save"}
+            {t(update.isPending ? "common.saving" : "common.save")}
           </Button>
         </div>
       </header>
 
       <div className="flex flex-col gap-4">
         <RichTextField
-          label="Description"
+          label={t("fields.description")}
           value={description}
           onChange={setDescription}
           format={descriptionFormat}
           onFormatChange={setDescriptionFormat}
-          placeholder="Goals, scope, references…"
-          emptyLabel="No description yet — click to add one."
+          placeholder={t("projects.descriptionPlaceholder")}
+          emptyLabel={t("projects.emptyDescription")}
         />
 
         <NotesSection
@@ -224,20 +226,21 @@ function StoriesSection({
   onToggle: (s: Story) => void;
   onDelete: (id: string) => void;
 }) {
+  const { t } = useTranslation();
   const [yellowDays] = useYellowDays();
   return (
     <section className="flex flex-col gap-2 border-t border-border pt-4">
       <header className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Stories</h3>
+        <h3 className="text-sm font-semibold">{t("fields.stories")}</h3>
         <Button type="button" size="sm" variant="outline" onClick={onAdd}>
           <Plus />
-          Add story
+          {t("projects.addStory")}
         </Button>
       </header>
 
       {stories.length === 0 ? (
         <p className="rounded-md border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-          No stories yet — group related tasks with "Add story".
+          {t("projects.noStories")}
         </p>
       ) : (
         <ul className="flex flex-col gap-1">
@@ -254,7 +257,7 @@ function StoriesSection({
                 size="icon"
                 variant="ghost"
                 onClick={() => onToggle(s)}
-                aria-label="Toggle status"
+                aria-label={t("tasks.toggleStatusAria")}
               >
                 <StatusIcon status={s.status} />
               </Button>
@@ -270,14 +273,10 @@ function StoriesSection({
                   {s.title}
                 </span>
                 {s.description.trim().length > 0 && (
-                  <FileText
-                    size={12}
-                    className="text-muted-foreground"
-                    aria-label="Has description"
-                  />
+                  <FileText size={12} className="text-muted-foreground" />
                 )}
                 <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
-                  Open
+                  {t("common.open")}
                   <ChevronRight size={12} />
                 </span>
               </button>
@@ -287,7 +286,7 @@ function StoriesSection({
                 variant="ghost"
                 className="opacity-0 transition-opacity group-hover:opacity-100"
                 onClick={() => onDelete(s.id)}
-                aria-label="Delete story"
+                aria-label={t("projects.deleteStoryAria")}
               >
                 <Trash2 />
               </Button>
@@ -310,19 +309,20 @@ function NotesSection({
   onAdd: () => void;
   onDelete: (id: string) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <section className="flex flex-col gap-2 border-t border-border pt-4">
       <header className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Notes</h3>
+        <h3 className="text-sm font-semibold">{t("nav.notes")}</h3>
         <Button type="button" size="sm" variant="outline" onClick={onAdd}>
           <Plus />
-          Add note
+          {t("projects.addNote")}
         </Button>
       </header>
 
       {notes.length === 0 ? (
         <p className="rounded-md border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-          No notes attached to this project yet.
+          {t("projects.noNotes")}
         </p>
       ) : (
         <ul className="flex flex-col gap-1">
@@ -342,7 +342,7 @@ function NotesSection({
                     <NotebookPen size={14} className="text-muted-foreground" />
                     <span className="font-medium">{n.title}</span>
                     <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
-                      Open
+                      {t("common.open")}
                       <ChevronRight size={12} />
                     </span>
                   </div>
@@ -359,7 +359,7 @@ function NotesSection({
                   variant="ghost"
                   className="opacity-0 transition-opacity group-hover:opacity-100"
                   onClick={() => onDelete(n.id)}
-                  aria-label="Delete note"
+                  aria-label={t("projects.deleteNoteAria")}
                 >
                   <Trash2 />
                 </Button>
