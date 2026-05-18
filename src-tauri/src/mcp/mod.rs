@@ -3,7 +3,7 @@ pub mod tools;
 
 use std::path::Path;
 
-pub use server::{start, stop, DEFAULT_PORT};
+pub use server::{start, DEFAULT_PORT};
 
 use crate::state::McpMode;
 

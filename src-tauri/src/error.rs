@@ -16,9 +16,6 @@ pub enum AppError {
 
     #[error("{0}")]
     Missing(&'static str),
-
-    #[error("{0}")]
-    Other(String),
 }
 
 impl Serialize for AppError {
