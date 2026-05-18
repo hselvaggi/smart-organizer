@@ -104,7 +104,7 @@ pub async fn set_mcp_mode(
 
 #[tauri::command]
 pub fn quit_app(app: tauri::AppHandle) {
-    app.exit(0);
+    crate::request_quit(&app);
 }
 
 #[tauri::command]

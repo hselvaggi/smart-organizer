@@ -7,6 +7,7 @@ mod mcp;
 mod search;
 mod state;
 
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 use state::{AppState, McpState};
@@ -14,6 +15,15 @@ use tauri::menu::{Menu, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{Manager, WindowEvent};
 use tokio::sync::Mutex;
+
+/// Set when the user picks Quit (tray menu or Settings → Quit) so the window
+/// close handler knows to let the close through instead of hiding the window.
+static QUITTING: AtomicBool = AtomicBool::new(false);
+
+pub(crate) fn request_quit(app: &tauri::AppHandle) {
+    QUITTING.store(true, Ordering::SeqCst);
+    app.exit(0);
+}
 
 pub fn run() {
     // Force a known dark GTK theme on Linux so the libayatana-appindicator
@@ -88,7 +98,7 @@ pub fn run() {
                 .show_menu_on_left_click(false)
                 .on_menu_event(|app, event| match event.id.as_ref() {
                     "show" => reveal_main_window(app),
-                    "quit" => app.exit(0),
+                    "quit" => request_quit(app),
                     _ => {}
                 })
                 .on_tray_icon_event(|tray, event| {
@@ -110,6 +120,9 @@ pub fn run() {
                 let window_clone = window.clone();
                 window.on_window_event(move |event| {
                     if let WindowEvent::CloseRequested { api, .. } = event {
+                        if QUITTING.load(Ordering::SeqCst) {
+                            return;
+                        }
                         api.prevent_close();
                         let _ = window_clone.hide();
                     }
