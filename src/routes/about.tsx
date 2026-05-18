@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { getName, getVersion } from "@tauri-apps/api/app";
+import { getVersion } from "@tauri-apps/api/app";
 import { Info } from "lucide-react";
+
+const APP_NAME = "Smart-Organizer";
 
 export const Route = createFileRoute("/about")({
   component: AboutPage,
@@ -10,11 +12,9 @@ export const Route = createFileRoute("/about")({
 
 function AboutPage() {
   const { t } = useTranslation();
-  const [name, setName] = useState<string>("Organizer");
   const [version, setVersion] = useState<string>("");
 
   useEffect(() => {
-    getName().then(setName).catch(() => {});
     getVersion().then(setVersion).catch(() => {});
   }, []);
 
@@ -29,7 +29,7 @@ function AboutPage() {
 
       <section className="flex max-w-2xl flex-col gap-4 rounded-md border border-border bg-card/40 p-6">
         <div>
-          <h3 className="text-lg font-semibold">{name}</h3>
+          <h3 className="text-lg font-semibold">{APP_NAME}</h3>
           {version && (
             <p className="text-xs text-muted-foreground">
               {t("about.version")} {version}
