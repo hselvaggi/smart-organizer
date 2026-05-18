@@ -3,7 +3,6 @@ import { Command } from "cmdk";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import DOMPurify from "dompurify";
 import {
   FolderKanban,
   ListTodo,
@@ -16,6 +15,7 @@ import type { SearchHit } from "@/types/generated";
 import { useSearch } from "@/lib/queries/search";
 import { useSearchStore } from "@/lib/store/search";
 import { cn } from "@/lib/cn";
+import { routeFor, sanitizeSnippet } from "./palette-helpers";
 
 type Kind = SearchHit["kind"];
 
@@ -28,58 +28,6 @@ const KIND_ICON: Record<Kind, JSX.Element> = {
   note: <StickyNote size={14} />,
   comment: <MessageSquare size={14} />,
 };
-
-function sanitizeSnippet(snippet: string): string {
-  return DOMPurify.sanitize(snippet, {
-    ALLOWED_TAGS: ["mark"],
-    ALLOWED_ATTR: [],
-  });
-}
-
-type SearchTarget =
-  | { to: "/projects/$projectId"; params: { projectId: string } }
-  | {
-      to: "/projects/$projectId/stories/$storyId";
-      params: { projectId: string; storyId: string };
-    }
-  | {
-      to: "/projects/$projectId/stories/$storyId/tasks/$taskId";
-      params: { projectId: string; storyId: string; taskId: string };
-    }
-  | { to: "/notes/$noteId"; params: { noteId: string } };
-
-function routeFor(hit: SearchHit): SearchTarget | null {
-  switch (hit.kind) {
-    case "project":
-      if (!hit.projectId) return null;
-      return {
-        to: "/projects/$projectId",
-        params: { projectId: hit.projectId },
-      };
-    case "story":
-      if (!hit.projectId || !hit.storyId) return null;
-      return {
-        to: "/projects/$projectId/stories/$storyId",
-        params: { projectId: hit.projectId, storyId: hit.storyId },
-      };
-    case "task":
-    case "comment":
-      if (!hit.projectId || !hit.storyId || !hit.taskId) return null;
-      return {
-        to: "/projects/$projectId/stories/$storyId/tasks/$taskId",
-        params: {
-          projectId: hit.projectId,
-          storyId: hit.storyId,
-          taskId: hit.taskId,
-        },
-      };
-    case "note":
-      if (!hit.entityId) return null;
-      return { to: "/notes/$noteId", params: { noteId: hit.entityId } };
-    default:
-      return null;
-  }
-}
 
 export function CommandPalette() {
   const { t } = useTranslation();
