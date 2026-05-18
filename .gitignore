@@ -11,6 +11,9 @@ tsconfig.tsbuildinfo
 *.png
 resume.txt
 
+# Local helper scripts (contain or handle secrets-adjacent state)
+scripts/setup-github-token.sh
+
 # Rust / Tauri
 src-tauri/target/
 src-tauri/gen/

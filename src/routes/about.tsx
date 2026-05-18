@@ -43,7 +43,18 @@ function AboutPage() {
           <dd>Tauri 2 · Rust · React · TypeScript · SQLite</dd>
 
           <dt className="text-muted-foreground">License</dt>
-          <dd>Personal use</dd>
+          <dd>
+            PolyForm Noncommercial 1.0.0 — free for personal /
+            noncommercial use. Commercial use requires a separate
+            license; contact{" "}
+            <a
+              href="mailto:harold.selvaggi@gmail.com"
+              className="text-primary hover:underline"
+            >
+              harold.selvaggi@gmail.com
+            </a>
+            .
+          </dd>
         </dl>
       </section>
     </div>
