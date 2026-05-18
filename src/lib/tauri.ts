@@ -11,6 +11,7 @@ import type {
   Note,
   Project,
   ProjectBoard,
+  SearchHit,
   Story,
   SystemInfo,
   Task,
@@ -57,6 +58,9 @@ export const api = {
   createNote: (input: NewNote) => invoke<Note>("create_note", { input }),
   updateNote: (input: UpdateNote) => invoke<Note>("update_note", { input }),
   deleteNote: (id: string) => invoke<void>("delete_note", { id }),
+
+  search: (query: string, limit?: number) =>
+    invoke<SearchHit[]>("search", { query, limit }),
 
   getSystemInfo: () => invoke<SystemInfo>("get_system_info"),
   resetDatabase: () => invoke<void>("reset_database"),

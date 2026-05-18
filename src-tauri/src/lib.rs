@@ -4,6 +4,7 @@ mod db;
 mod domain;
 mod error;
 mod mcp;
+mod search;
 mod state;
 
 use std::sync::Arc;
@@ -144,6 +145,7 @@ pub fn run() {
             commands::notes::create_note,
             commands::notes::update_note,
             commands::notes::delete_note,
+            commands::search::search,
             commands::system::get_system_info,
             commands::system::reset_database,
             commands::system::quit_app,

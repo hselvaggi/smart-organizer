@@ -25,5 +25,10 @@ pub async fn open_pool(db_path: &Path) -> AppResult<SqlitePool> {
 
     sqlx::migrate!("./migrations").run(&pool).await?;
 
+    if crate::search::is_empty(&pool).await? {
+        tracing::info!("backfilling search index");
+        crate::search::reindex_all(&pool).await?;
+    }
+
     Ok(pool)
 }

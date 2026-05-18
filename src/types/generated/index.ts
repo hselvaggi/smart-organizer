@@ -10,6 +10,7 @@ export type { NewTask } from "./NewTask";
 export type { Note } from "./Note";
 export type { Project } from "./Project";
 export type { ProjectBoard } from "./ProjectBoard";
+export type { SearchHit } from "./SearchHit";
 export type { Story } from "./Story";
 export type { SystemInfo } from "./SystemInfo";
 export type { Task } from "./Task";

@@ -3,6 +3,7 @@ use sqlx::SqlitePool;
 use crate::domain::ids::{new_id, now_iso};
 use crate::domain::{Comment, NewComment};
 use crate::error::{AppError, AppResult};
+use crate::search;
 
 pub async fn list_for_task(pool: &SqlitePool, task_id: &str) -> AppResult<Vec<Comment>> {
     let rows = sqlx::query_as::<_, Comment>(
@@ -40,7 +41,9 @@ pub async fn create(pool: &SqlitePool, input: NewComment) -> AppResult<Comment> 
     .fetch_optional(pool)
     .await?;
 
-    row.ok_or_else(|| AppError::Other("comment missing after insert".into()))
+    let comment = row.ok_or_else(|| AppError::Other("comment missing after insert".into()))?;
+    search::index_comment(pool, &comment).await?;
+    Ok(comment)
 }
 
 pub async fn soft_delete(pool: &SqlitePool, id: &str) -> AppResult<()> {
@@ -50,5 +53,6 @@ pub async fn soft_delete(pool: &SqlitePool, id: &str) -> AppResult<()> {
         .bind(now)
         .execute(pool)
         .await?;
+    search::remove(pool, search::EntityKind::Comment, id).await?;
     Ok(())
 }

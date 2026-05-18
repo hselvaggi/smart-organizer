@@ -3,6 +3,7 @@ use sqlx::SqlitePool;
 use crate::domain::ids::{new_id, now_iso};
 use crate::domain::{NewNote, Note, UpdateNote};
 use crate::error::{AppError, AppResult};
+use crate::search;
 
 pub async fn list_standalone(pool: &SqlitePool) -> AppResult<Vec<Note>> {
     let rows = sqlx::query_as::<_, Note>(
@@ -63,9 +64,11 @@ pub async fn create(pool: &SqlitePool, input: NewNote) -> AppResult<Note> {
     .execute(pool)
     .await?;
 
-    get(pool, &id)
+    let note = get(pool, &id)
         .await?
-        .ok_or_else(|| AppError::Other("note missing after insert".into()))
+        .ok_or_else(|| AppError::Other("note missing after insert".into()))?;
+    search::index_note(pool, &note).await?;
+    Ok(note)
 }
 
 pub async fn update(pool: &SqlitePool, input: UpdateNote) -> AppResult<Note> {
@@ -99,9 +102,11 @@ pub async fn update(pool: &SqlitePool, input: UpdateNote) -> AppResult<Note> {
 
     tx.commit().await?;
 
-    get(pool, &input.id)
+    let note = get(pool, &input.id)
         .await?
-        .ok_or_else(|| AppError::Other("note missing after update".into()))
+        .ok_or_else(|| AppError::Other("note missing after update".into()))?;
+    search::index_note(pool, &note).await?;
+    Ok(note)
 }
 
 pub async fn soft_delete(pool: &SqlitePool, id: &str) -> AppResult<()> {
@@ -111,5 +116,6 @@ pub async fn soft_delete(pool: &SqlitePool, id: &str) -> AppResult<()> {
         .bind(now)
         .execute(pool)
         .await?;
+    search::remove(pool, search::EntityKind::Note, id).await?;
     Ok(())
 }

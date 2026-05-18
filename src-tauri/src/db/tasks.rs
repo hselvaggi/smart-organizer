@@ -3,6 +3,7 @@ use sqlx::SqlitePool;
 use crate::domain::ids::{new_id, now_iso};
 use crate::domain::{NewTask, Task, UpdateTask};
 use crate::error::{AppError, AppResult};
+use crate::search;
 
 pub async fn list_for_story(pool: &SqlitePool, story_id: &str) -> AppResult<Vec<Task>> {
     let rows = sqlx::query_as::<_, Task>(
@@ -78,9 +79,11 @@ pub async fn create(pool: &SqlitePool, input: NewTask) -> AppResult<Task> {
     .execute(pool)
     .await?;
 
-    get(pool, &id)
+    let task = get(pool, &id)
         .await?
-        .ok_or_else(|| AppError::Other("task missing after insert".into()))
+        .ok_or_else(|| AppError::Other("task missing after insert".into()))?;
+    search::index_task(pool, &task).await?;
+    Ok(task)
 }
 
 pub async fn update(pool: &SqlitePool, input: UpdateTask) -> AppResult<Task> {
@@ -169,9 +172,11 @@ pub async fn update(pool: &SqlitePool, input: UpdateTask) -> AppResult<Task> {
 
     tx.commit().await?;
 
-    get(pool, &input.id)
+    let task = get(pool, &input.id)
         .await?
-        .ok_or_else(|| AppError::Other("task missing after update".into()))
+        .ok_or_else(|| AppError::Other("task missing after update".into()))?;
+    search::index_task(pool, &task).await?;
+    Ok(task)
 }
 
 pub async fn soft_delete(pool: &SqlitePool, id: &str) -> AppResult<()> {
@@ -181,5 +186,6 @@ pub async fn soft_delete(pool: &SqlitePool, id: &str) -> AppResult<()> {
         .bind(now)
         .execute(pool)
         .await?;
+    search::remove(pool, search::EntityKind::Task, id).await?;
     Ok(())
 }

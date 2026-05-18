@@ -27,8 +27,23 @@
     "system": "System",
     "settings": "Settings",
     "about": "About",
+    "search": "Search",
     "hideSidebar": "Hide sidebar",
     "showSidebar": "Show sidebar"
+  },
+  "search": {
+    "title": "Search",
+    "description": "Search across projects, stories, tasks, notes and comments.",
+    "placeholder": "Search projects, stories, tasks, notes…",
+    "hint": "Type at least two characters to search.",
+    "noResults": "No matches.",
+    "groups": {
+      "project": "Projects",
+      "story": "Stories",
+      "task": "Tasks",
+      "note": "Notes",
+      "comment": "Comments"
+    }
   },
   "titleBar": {
     "minimize": "Minimize",

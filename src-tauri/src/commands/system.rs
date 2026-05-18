@@ -111,6 +111,7 @@ pub fn quit_app(app: tauri::AppHandle) {
 pub async fn reset_database(state: State<'_, AppState>) -> AppResult<()> {
     let mut tx = state.db.begin().await?;
     for table in [
+        "search_index",
         "comments",
         "tasks",
         "stories",

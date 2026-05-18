@@ -27,8 +27,23 @@
     "system": "Sistema",
     "settings": "Ajustes",
     "about": "Acerca de",
+    "search": "Buscar",
     "hideSidebar": "Ocultar barra lateral",
     "showSidebar": "Mostrar barra lateral"
+  },
+  "search": {
+    "title": "Buscar",
+    "description": "Busca en proyectos, stories, tareas, notas y comentarios.",
+    "placeholder": "Buscar proyectos, stories, tareas, notas…",
+    "hint": "Escribí al menos dos caracteres para buscar.",
+    "noResults": "Sin coincidencias.",
+    "groups": {
+      "project": "Proyectos",
+      "story": "Stories",
+      "task": "Tareas",
+      "note": "Notas",
+      "comment": "Comentarios"
+    }
   },
   "titleBar": {
     "minimize": "Minimizar",

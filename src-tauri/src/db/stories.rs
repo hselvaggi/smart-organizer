@@ -3,6 +3,7 @@ use sqlx::SqlitePool;
 use crate::domain::ids::{new_id, now_iso};
 use crate::domain::{NewStory, Story, UpdateStory};
 use crate::error::{AppError, AppResult};
+use crate::search;
 
 pub async fn list_for_project(pool: &SqlitePool, project_id: &str) -> AppResult<Vec<Story>> {
     let rows = sqlx::query_as::<_, Story>(
@@ -59,9 +60,11 @@ pub async fn create(pool: &SqlitePool, input: NewStory) -> AppResult<Story> {
     .execute(pool)
     .await?;
 
-    get(pool, &id)
+    let story = get(pool, &id)
         .await?
-        .ok_or_else(|| AppError::Other("story missing after insert".into()))
+        .ok_or_else(|| AppError::Other("story missing after insert".into()))?;
+    search::index_story(pool, &story).await?;
+    Ok(story)
 }
 
 pub async fn update(pool: &SqlitePool, input: UpdateStory) -> AppResult<Story> {
@@ -118,9 +121,11 @@ pub async fn update(pool: &SqlitePool, input: UpdateStory) -> AppResult<Story> {
 
     tx.commit().await?;
 
-    get(pool, &input.id)
+    let story = get(pool, &input.id)
         .await?
-        .ok_or_else(|| AppError::Other("story missing after update".into()))
+        .ok_or_else(|| AppError::Other("story missing after update".into()))?;
+    search::index_story(pool, &story).await?;
+    Ok(story)
 }
 
 pub async fn soft_delete(pool: &SqlitePool, id: &str) -> AppResult<()> {
@@ -130,5 +135,6 @@ pub async fn soft_delete(pool: &SqlitePool, id: &str) -> AppResult<()> {
         .bind(now)
         .execute(pool)
         .await?;
+    search::remove(pool, search::EntityKind::Story, id).await?;
     Ok(())
 }
