@@ -10,14 +10,14 @@ export const projectKeys = {
 export function useProjects() {
   return useQuery({
     queryKey: projectKeys.all,
-    queryFn: api.listProjects,
+    queryFn: api.projects.list,
   });
 }
 
 export function useProject(id: string) {
   return useQuery({
     queryKey: projectKeys.detail(id),
-    queryFn: () => api.getProject(id),
+    queryFn: () => api.projects.get(id),
     enabled: !!id,
   });
 }
@@ -25,7 +25,7 @@ export function useProject(id: string) {
 export function useCreateProject() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: NewProject) => api.createProject(input),
+    mutationFn: (input: NewProject) => api.projects.create(input),
     onSuccess: () => qc.invalidateQueries({ queryKey: projectKeys.all }),
   });
 }
@@ -33,7 +33,7 @@ export function useCreateProject() {
 export function useUpdateProject() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: UpdateProject) => api.updateProject(input),
+    mutationFn: (input: UpdateProject) => api.projects.update(input),
     onSuccess: (project) => {
       qc.invalidateQueries({ queryKey: projectKeys.all });
       qc.invalidateQueries({ queryKey: projectKeys.detail(project.id) });
@@ -44,7 +44,7 @@ export function useUpdateProject() {
 export function useDeleteProject() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => api.deleteProject(id),
+    mutationFn: (id: string) => api.projects.remove(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: projectKeys.all }),
   });
 }

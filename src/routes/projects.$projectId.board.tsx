@@ -53,7 +53,7 @@ function ProjectBoard() {
   const { data: project } = useProject(projectId);
   const { data: board, isLoading } = useQuery({
     queryKey: ["project-board", projectId],
-    queryFn: () => api.getProjectBoard(projectId),
+    queryFn: () => api.projects.board(projectId),
     enabled: !!projectId,
   });
 

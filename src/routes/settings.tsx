@@ -110,7 +110,7 @@ function ApplicationSection() {
         {t("settings.application.description")}
       </p>
       <div>
-        <Button type="button" variant="outline" onClick={() => api.quitApp()}>
+        <Button type="button" variant="outline" onClick={() => api.system.quit()}>
           <Power />
           {t("settings.application.quit")}
         </Button>
@@ -182,10 +182,10 @@ function McpSection() {
   const qc = useQueryClient();
   const { data: status } = useQuery({
     queryKey: ["mcp-status"],
-    queryFn: api.getMcpStatus,
+    queryFn: api.mcp.status,
   });
   const setMode = useMutation({
-    mutationFn: (mode: McpMode) => api.setMcpMode(mode),
+    mutationFn: (mode: McpMode) => api.mcp.setMode(mode),
     onSuccess: (data) => {
       qc.setQueryData(["mcp-status"], data);
     },
@@ -296,7 +296,7 @@ function DangerZone() {
   const [done, setDone] = useState(false);
 
   const reset = useMutation({
-    mutationFn: api.resetDatabase,
+    mutationFn: api.system.reset,
     onSuccess: () => {
       qc.clear();
       setDone(true);

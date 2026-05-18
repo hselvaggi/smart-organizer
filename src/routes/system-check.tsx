@@ -87,7 +87,7 @@ function SystemCheck() {
   const { t } = useTranslation();
   const { data, isLoading, error } = useQuery({
     queryKey: ["system-info"],
-    queryFn: api.getSystemInfo,
+    queryFn: api.system.info,
   });
 
   return (

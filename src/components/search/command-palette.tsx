@@ -36,7 +36,19 @@ function sanitizeSnippet(snippet: string): string {
   });
 }
 
-function routeFor(hit: SearchHit): { to: string; params: Record<string, string> } | null {
+type SearchTarget =
+  | { to: "/projects/$projectId"; params: { projectId: string } }
+  | {
+      to: "/projects/$projectId/stories/$storyId";
+      params: { projectId: string; storyId: string };
+    }
+  | {
+      to: "/projects/$projectId/stories/$storyId/tasks/$taskId";
+      params: { projectId: string; storyId: string; taskId: string };
+    }
+  | { to: "/notes/$noteId"; params: { noteId: string } };
+
+function routeFor(hit: SearchHit): SearchTarget | null {
   switch (hit.kind) {
     case "project":
       if (!hit.projectId) return null;
@@ -101,9 +113,20 @@ export function CommandPalette() {
   function selectHit(hit: SearchHit) {
     const target = routeFor(hit);
     setOpen(false);
-    if (target) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      navigate({ to: target.to as any, params: target.params as any });
+    if (!target) return;
+    switch (target.to) {
+      case "/projects/$projectId":
+        navigate({ to: target.to, params: target.params });
+        return;
+      case "/projects/$projectId/stories/$storyId":
+        navigate({ to: target.to, params: target.params });
+        return;
+      case "/projects/$projectId/stories/$storyId/tasks/$taskId":
+        navigate({ to: target.to, params: target.params });
+        return;
+      case "/notes/$noteId":
+        navigate({ to: target.to, params: target.params });
+        return;
     }
   }
 

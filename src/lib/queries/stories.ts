@@ -10,7 +10,7 @@ export const storyKeys = {
 export function useStories(projectId: string) {
   return useQuery({
     queryKey: storyKeys.byProject(projectId),
-    queryFn: () => api.listStories(projectId),
+    queryFn: () => api.stories.list(projectId),
     enabled: !!projectId,
   });
 }
@@ -18,7 +18,7 @@ export function useStories(projectId: string) {
 export function useStory(id: string) {
   return useQuery({
     queryKey: storyKeys.detail(id),
-    queryFn: () => api.getStory(id),
+    queryFn: () => api.stories.get(id),
     enabled: !!id,
   });
 }
@@ -26,7 +26,7 @@ export function useStory(id: string) {
 export function useCreateStory(projectId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: NewStory) => api.createStory(input),
+    mutationFn: (input: NewStory) => api.stories.create(input),
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: storyKeys.byProject(projectId) }),
   });
@@ -35,7 +35,7 @@ export function useCreateStory(projectId: string) {
 export function useUpdateStory(projectId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: UpdateStory) => api.updateStory(input),
+    mutationFn: (input: UpdateStory) => api.stories.update(input),
     onSuccess: (story) => {
       qc.invalidateQueries({ queryKey: storyKeys.byProject(projectId) });
       qc.invalidateQueries({ queryKey: storyKeys.detail(story.id) });
@@ -46,7 +46,7 @@ export function useUpdateStory(projectId: string) {
 export function useDeleteStory(projectId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => api.deleteStory(id),
+    mutationFn: (id: string) => api.stories.remove(id),
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: storyKeys.byProject(projectId) }),
   });

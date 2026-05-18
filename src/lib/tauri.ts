@@ -22,49 +22,63 @@ import type {
 } from "@/types/generated";
 
 export const api = {
-  listProjects: () => invoke<Project[]>("list_projects"),
-  getProject: (id: string) => invoke<Project | null>("get_project", { id }),
-  createProject: (input: NewProject) => invoke<Project>("create_project", { input }),
-  updateProject: (input: UpdateProject) =>
-    invoke<Project>("update_project", { input }),
-  deleteProject: (id: string) => invoke<void>("delete_project", { id }),
-  getProjectBoard: (projectId: string) =>
-    invoke<ProjectBoard>("get_project_board", { projectId }),
+  projects: {
+    list: () => invoke<Project[]>("list_projects"),
+    get: (id: string) => invoke<Project | null>("get_project", { id }),
+    create: (input: NewProject) => invoke<Project>("create_project", { input }),
+    update: (input: UpdateProject) =>
+      invoke<Project>("update_project", { input }),
+    remove: (id: string) => invoke<void>("delete_project", { id }),
+    board: (projectId: string) =>
+      invoke<ProjectBoard>("get_project_board", { projectId }),
+  },
 
-  listStories: (projectId: string) =>
-    invoke<Story[]>("list_stories", { projectId }),
-  getStory: (id: string) => invoke<Story | null>("get_story", { id }),
-  createStory: (input: NewStory) => invoke<Story>("create_story", { input }),
-  updateStory: (input: UpdateStory) =>
-    invoke<Story>("update_story", { input }),
-  deleteStory: (id: string) => invoke<void>("delete_story", { id }),
+  stories: {
+    list: (projectId: string) =>
+      invoke<Story[]>("list_stories", { projectId }),
+    get: (id: string) => invoke<Story | null>("get_story", { id }),
+    create: (input: NewStory) => invoke<Story>("create_story", { input }),
+    update: (input: UpdateStory) =>
+      invoke<Story>("update_story", { input }),
+    remove: (id: string) => invoke<void>("delete_story", { id }),
+  },
 
-  listTasks: (storyId: string) => invoke<Task[]>("list_tasks", { storyId }),
-  getTask: (id: string) => invoke<Task | null>("get_task", { id }),
-  createTask: (input: NewTask) => invoke<Task>("create_task", { input }),
-  updateTask: (input: UpdateTask) => invoke<Task>("update_task", { input }),
-  deleteTask: (id: string) => invoke<void>("delete_task", { id }),
+  tasks: {
+    list: (storyId: string) => invoke<Task[]>("list_tasks", { storyId }),
+    get: (id: string) => invoke<Task | null>("get_task", { id }),
+    create: (input: NewTask) => invoke<Task>("create_task", { input }),
+    update: (input: UpdateTask) => invoke<Task>("update_task", { input }),
+    remove: (id: string) => invoke<void>("delete_task", { id }),
+  },
 
-  listComments: (taskId: string) =>
-    invoke<Comment[]>("list_comments", { taskId }),
-  createComment: (input: NewComment) =>
-    invoke<Comment>("create_comment", { input }),
-  deleteComment: (id: string) => invoke<void>("delete_comment", { id }),
+  comments: {
+    list: (taskId: string) => invoke<Comment[]>("list_comments", { taskId }),
+    create: (input: NewComment) =>
+      invoke<Comment>("create_comment", { input }),
+    remove: (id: string) => invoke<void>("delete_comment", { id }),
+  },
 
-  listNotes: () => invoke<Note[]>("list_notes"),
-  listNotesForProject: (projectId: string) =>
-    invoke<Note[]>("list_notes_for_project", { projectId }),
-  getNote: (id: string) => invoke<Note | null>("get_note", { id }),
-  createNote: (input: NewNote) => invoke<Note>("create_note", { input }),
-  updateNote: (input: UpdateNote) => invoke<Note>("update_note", { input }),
-  deleteNote: (id: string) => invoke<void>("delete_note", { id }),
+  notes: {
+    list: () => invoke<Note[]>("list_notes"),
+    listForProject: (projectId: string) =>
+      invoke<Note[]>("list_notes_for_project", { projectId }),
+    get: (id: string) => invoke<Note | null>("get_note", { id }),
+    create: (input: NewNote) => invoke<Note>("create_note", { input }),
+    update: (input: UpdateNote) => invoke<Note>("update_note", { input }),
+    remove: (id: string) => invoke<void>("delete_note", { id }),
+  },
 
   search: (query: string, limit?: number) =>
     invoke<SearchHit[]>("search", { query, limit }),
 
-  getSystemInfo: () => invoke<SystemInfo>("get_system_info"),
-  resetDatabase: () => invoke<void>("reset_database"),
-  quitApp: () => invoke<void>("quit_app"),
-  getMcpStatus: () => invoke<McpStatus>("get_mcp_status"),
-  setMcpMode: (mode: McpMode) => invoke<McpStatus>("set_mcp_mode", { mode }),
+  system: {
+    info: () => invoke<SystemInfo>("get_system_info"),
+    reset: () => invoke<void>("reset_database"),
+    quit: () => invoke<void>("quit_app"),
+  },
+
+  mcp: {
+    status: () => invoke<McpStatus>("get_mcp_status"),
+    setMode: (mode: McpMode) => invoke<McpStatus>("set_mcp_mode", { mode }),
+  },
 };

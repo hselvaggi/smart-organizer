@@ -9,7 +9,7 @@ export const commentKeys = {
 export function useComments(taskId: string) {
   return useQuery({
     queryKey: commentKeys.byTask(taskId),
-    queryFn: () => api.listComments(taskId),
+    queryFn: () => api.comments.list(taskId),
     enabled: !!taskId,
   });
 }
@@ -17,7 +17,7 @@ export function useComments(taskId: string) {
 export function useCreateComment(taskId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: NewComment) => api.createComment(input),
+    mutationFn: (input: NewComment) => api.comments.create(input),
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: commentKeys.byTask(taskId) }),
   });
@@ -26,7 +26,7 @@ export function useCreateComment(taskId: string) {
 export function useDeleteComment(taskId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => api.deleteComment(id),
+    mutationFn: (id: string) => api.comments.remove(id),
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: commentKeys.byTask(taskId) }),
   });

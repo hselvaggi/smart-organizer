@@ -10,7 +10,7 @@ export const taskKeys = {
 export function useTasks(storyId: string) {
   return useQuery({
     queryKey: taskKeys.byStory(storyId),
-    queryFn: () => api.listTasks(storyId),
+    queryFn: () => api.tasks.list(storyId),
     enabled: !!storyId,
   });
 }
@@ -18,7 +18,7 @@ export function useTasks(storyId: string) {
 export function useTask(id: string) {
   return useQuery({
     queryKey: taskKeys.detail(id),
-    queryFn: () => api.getTask(id),
+    queryFn: () => api.tasks.get(id),
     enabled: !!id,
   });
 }
@@ -26,7 +26,7 @@ export function useTask(id: string) {
 export function useCreateTask(storyId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: NewTask) => api.createTask(input),
+    mutationFn: (input: NewTask) => api.tasks.create(input),
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: taskKeys.byStory(storyId) }),
   });
@@ -35,7 +35,7 @@ export function useCreateTask(storyId: string) {
 export function useUpdateTask(storyId?: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: UpdateTask) => api.updateTask(input),
+    mutationFn: (input: UpdateTask) => api.tasks.update(input),
     onSuccess: (task) => {
       qc.invalidateQueries({ queryKey: taskKeys.detail(task.id) });
       if (storyId) {
@@ -48,7 +48,7 @@ export function useUpdateTask(storyId?: string) {
 export function useDeleteTask(storyId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => api.deleteTask(id),
+    mutationFn: (id: string) => api.tasks.remove(id),
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: taskKeys.byStory(storyId) }),
   });

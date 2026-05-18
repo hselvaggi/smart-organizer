@@ -11,14 +11,14 @@ export const noteKeys = {
 export function useNotes() {
   return useQuery({
     queryKey: noteKeys.standalone,
-    queryFn: api.listNotes,
+    queryFn: api.notes.list,
   });
 }
 
 export function useNotesForProject(projectId: string) {
   return useQuery({
     queryKey: noteKeys.byProject(projectId),
-    queryFn: () => api.listNotesForProject(projectId),
+    queryFn: () => api.notes.listForProject(projectId),
     enabled: !!projectId,
   });
 }
@@ -26,7 +26,7 @@ export function useNotesForProject(projectId: string) {
 export function useNote(id: string) {
   return useQuery({
     queryKey: noteKeys.detail(id),
-    queryFn: () => api.getNote(id),
+    queryFn: () => api.notes.get(id),
     enabled: !!id,
   });
 }
@@ -34,7 +34,7 @@ export function useNote(id: string) {
 export function useCreateNote() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: NewNote) => api.createNote(input),
+    mutationFn: (input: NewNote) => api.notes.create(input),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["notes"] }),
   });
 }
@@ -42,7 +42,7 @@ export function useCreateNote() {
 export function useUpdateNote() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: UpdateNote) => api.updateNote(input),
+    mutationFn: (input: UpdateNote) => api.notes.update(input),
     onSuccess: (note) => {
       qc.invalidateQueries({ queryKey: ["notes"] });
       qc.invalidateQueries({ queryKey: noteKeys.detail(note.id) });
@@ -53,7 +53,7 @@ export function useUpdateNote() {
 export function useDeleteNote() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => api.deleteNote(id),
+    mutationFn: (id: string) => api.notes.remove(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["notes"] }),
   });
 }
