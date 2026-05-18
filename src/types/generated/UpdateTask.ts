@@ -2,4 +2,4 @@
 import type { TaskStatus } from "./TaskStatus";
 import type { TextFormat } from "./TextFormat";
 
-export type UpdateTask = { id: string, title: string | null, description: string | null, descriptionFormat: TextFormat | null, result: string | null, resultFormat: TextFormat | null, status: TaskStatus | null, parentTaskId: string | null | null, sortOrder: number | null, dueDate: string | null | null, };
+export type UpdateTask = { id: string, title?: string, description?: string, descriptionFormat?: TextFormat, result?: string, resultFormat?: TextFormat, status?: TaskStatus, parentTaskId?: string | null, sortOrder?: number, dueDate?: string | null, };

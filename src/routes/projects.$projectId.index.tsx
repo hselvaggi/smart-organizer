@@ -197,14 +197,7 @@ function ProjectDetail() {
           }
           onAdd={handleAddStory}
           onToggle={(s) =>
-            updateStory.mutate({
-              id: s.id,
-              status: nextStatus(s.status),
-              title: null,
-              description: null,
-              descriptionFormat: null,
-              dueDate: null,
-            })
+            updateStory.mutate({ id: s.id, status: nextStatus(s.status) })
           }
           onDelete={(id) => removeStory.mutate(id)}
         />

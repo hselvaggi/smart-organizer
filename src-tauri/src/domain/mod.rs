@@ -130,8 +130,14 @@ pub struct NewNote {
 #[serde(rename_all = "camelCase")]
 pub struct UpdateNote {
     pub id: String,
+    #[serde(default)]
+    #[ts(optional)]
     pub title: Option<String>,
+    #[serde(default)]
+    #[ts(optional)]
     pub body: Option<String>,
+    #[serde(default)]
+    #[ts(optional)]
     pub body_format: Option<TextFormat>,
 }
 
@@ -200,8 +206,14 @@ pub struct NewComment {
 #[serde(rename_all = "camelCase")]
 pub struct UpdateProject {
     pub id: String,
+    #[serde(default)]
+    #[ts(optional)]
     pub title: Option<String>,
+    #[serde(default)]
+    #[ts(optional)]
     pub description: Option<String>,
+    #[serde(default)]
+    #[ts(optional)]
     pub description_format: Option<TextFormat>,
 }
 
@@ -210,10 +222,20 @@ pub struct UpdateProject {
 #[serde(rename_all = "camelCase")]
 pub struct UpdateStory {
     pub id: String,
+    #[serde(default)]
+    #[ts(optional)]
     pub title: Option<String>,
+    #[serde(default)]
+    #[ts(optional)]
     pub description: Option<String>,
+    #[serde(default)]
+    #[ts(optional)]
     pub description_format: Option<TextFormat>,
+    #[serde(default)]
+    #[ts(optional)]
     pub status: Option<TaskStatus>,
+    #[serde(default)]
+    #[ts(optional)]
     pub due_date: Option<Option<String>>,
 }
 
@@ -246,14 +268,31 @@ pub struct SystemInfo {
 #[serde(rename_all = "camelCase")]
 pub struct UpdateTask {
     pub id: String,
+    #[serde(default)]
+    #[ts(optional)]
     pub title: Option<String>,
+    #[serde(default)]
+    #[ts(optional)]
     pub description: Option<String>,
+    #[serde(default)]
+    #[ts(optional)]
     pub description_format: Option<TextFormat>,
+    #[serde(default)]
+    #[ts(optional)]
     pub result: Option<String>,
+    #[serde(default)]
+    #[ts(optional)]
     pub result_format: Option<TextFormat>,
+    #[serde(default)]
+    #[ts(optional)]
     pub status: Option<TaskStatus>,
+    #[serde(default)]
+    #[ts(optional)]
     pub parent_task_id: Option<Option<String>>,
-    #[ts(type = "number | null")]
+    #[serde(default)]
+    #[ts(optional, type = "number")]
     pub sort_order: Option<i64>,
+    #[serde(default)]
+    #[ts(optional)]
     pub due_date: Option<Option<String>>,
 }

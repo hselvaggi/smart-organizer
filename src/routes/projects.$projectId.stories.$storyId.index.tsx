@@ -195,18 +195,7 @@ function StoryDetail() {
           }
           onAdd={handleAddTask}
           onToggle={(t) =>
-            updateTask.mutate({
-              id: t.id,
-              status: nextStatus(t.status),
-              title: null,
-              description: null,
-              descriptionFormat: null,
-              result: null,
-              resultFormat: null,
-              parentTaskId: null,
-              sortOrder: null,
-              dueDate: null,
-            })
+            updateTask.mutate({ id: t.id, status: nextStatus(t.status) })
           }
           onDelete={(id) => removeTask.mutate(id)}
         />

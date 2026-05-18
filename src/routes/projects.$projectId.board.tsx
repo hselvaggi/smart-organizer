@@ -75,30 +75,12 @@ function ProjectBoard() {
 
     if (card.kind === "story") {
       updateStory.mutate(
-        {
-          id: card.item.id,
-          status: newStatus,
-          title: null,
-          description: null,
-          descriptionFormat: null,
-          dueDate: null,
-        },
+        { id: card.item.id, status: newStatus },
         { onSuccess: invalidate },
       );
     } else {
       updateTask.mutate(
-        {
-          id: card.item.id,
-          status: newStatus,
-          title: null,
-          description: null,
-          descriptionFormat: null,
-          result: null,
-          resultFormat: null,
-          parentTaskId: null,
-          sortOrder: null,
-          dueDate: null,
-        },
+        { id: card.item.id, status: newStatus },
         { onSuccess: invalidate },
       );
     }
@@ -147,23 +129,11 @@ function ProjectBoard() {
       updateStory.mutate({
         id: card.item.id,
         status: nextStatus(card.item.status),
-        title: null,
-        description: null,
-        descriptionFormat: null,
-        dueDate: null,
       });
     } else {
       updateTask.mutate({
         id: card.item.id,
         status: nextStatus(card.item.status),
-        title: null,
-        description: null,
-        descriptionFormat: null,
-        result: null,
-        resultFormat: null,
-        parentTaskId: null,
-        sortOrder: null,
-        dueDate: null,
       });
     }
   };

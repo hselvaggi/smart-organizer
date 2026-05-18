@@ -2,4 +2,4 @@
 import type { TaskStatus } from "./TaskStatus";
 import type { TextFormat } from "./TextFormat";
 
-export type UpdateStory = { id: string, title: string | null, description: string | null, descriptionFormat: TextFormat | null, status: TaskStatus | null, dueDate: string | null | null, };
+export type UpdateStory = { id: string, title?: string, description?: string, descriptionFormat?: TextFormat, status?: TaskStatus, dueDate?: string | null, };

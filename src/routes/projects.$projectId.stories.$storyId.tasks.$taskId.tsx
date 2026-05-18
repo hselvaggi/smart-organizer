@@ -111,8 +111,6 @@ function TaskDetail() {
       result,
       resultFormat,
       status,
-      parentTaskId: null,
-      sortOrder: null,
       dueDate: dueDate || null,
     });
   };
@@ -201,18 +199,7 @@ function TaskDetail() {
           }
           onAdd={handleAddSubtask}
           onToggle={(t) =>
-            update.mutate({
-              id: t.id,
-              status: nextStatus(t.status),
-              title: null,
-              description: null,
-              descriptionFormat: null,
-              result: null,
-              resultFormat: null,
-              parentTaskId: null,
-              sortOrder: null,
-              dueDate: null,
-            })
+            update.mutate({ id: t.id, status: nextStatus(t.status) })
           }
           onDelete={(id) => remove.mutate(id)}
         />
