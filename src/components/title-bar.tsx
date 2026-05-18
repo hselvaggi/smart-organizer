@@ -48,7 +48,7 @@ export function TitleBar() {
           data-tauri-drag-region
           className="px-1 text-xs font-semibold tracking-tight text-foreground"
         >
-          Organizer
+          Smart-Organizer
         </span>
       </div>
       <div className="flex items-center">
