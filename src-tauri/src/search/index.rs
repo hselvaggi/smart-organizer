@@ -1,5 +1,8 @@
+use std::collections::HashMap;
+
 use sqlx::SqlitePool;
 
+use crate::db;
 use crate::domain::{Comment, Note, Project, Story, Task};
 use crate::error::AppResult;
 use crate::search::extract;
@@ -105,6 +108,10 @@ pub async fn index_task(pool: &SqlitePool, task: &Task) -> AppResult<()> {
             .bind(&task.story_id)
             .fetch_optional(pool)
             .await?;
+    upsert(pool, task_entry(task, project_id)).await
+}
+
+fn task_entry(task: &Task, project_id: Option<String>) -> IndexEntry {
     let mut body = extract::extract(&task.description, task.description_format);
     let res = extract::extract(&task.result, task.result_format);
     if !res.is_empty() {
@@ -113,19 +120,15 @@ pub async fn index_task(pool: &SqlitePool, task: &Task) -> AppResult<()> {
         }
         body.push_str(&res);
     }
-    upsert(
-        pool,
-        IndexEntry {
-            kind: EntityKind::Task,
-            entity_id: task.id.clone(),
-            project_id,
-            story_id: Some(task.story_id.clone()),
-            task_id: Some(task.id.clone()),
-            title: task.title.clone(),
-            body,
-        },
-    )
-    .await
+    IndexEntry {
+        kind: EntityKind::Task,
+        entity_id: task.id.clone(),
+        project_id,
+        story_id: Some(task.story_id.clone()),
+        task_id: Some(task.id.clone()),
+        title: task.title.clone(),
+        body,
+    }
 }
 
 pub async fn index_note(pool: &SqlitePool, note: &Note) -> AppResult<()> {
@@ -158,83 +161,102 @@ pub async fn index_comment(pool: &SqlitePool, comment: &Comment) -> AppResult<()
         Some((p, s)) => (Some(p), Some(s)),
         None => (None, None),
     };
-    upsert(
-        pool,
-        IndexEntry {
-            kind: EntityKind::Comment,
-            entity_id: comment.id.clone(),
-            project_id,
-            story_id,
-            task_id: Some(comment.task_id.clone()),
-            title: String::new(),
-            body: extract::extract(&comment.body, comment.body_format),
-        },
-    )
-    .await
+    upsert(pool, comment_entry(comment, project_id, story_id)).await
+}
+
+fn comment_entry(
+    comment: &Comment,
+    project_id: Option<String>,
+    story_id: Option<String>,
+) -> IndexEntry {
+    IndexEntry {
+        kind: EntityKind::Comment,
+        entity_id: comment.id.clone(),
+        project_id,
+        story_id,
+        task_id: Some(comment.task_id.clone()),
+        title: String::new(),
+        body: extract::extract(&comment.body, comment.body_format),
+    }
 }
 
 /// Wipe and repopulate the entire FTS table from the live source rows. Called
 /// from `db::open_pool` on startup when the index is empty (first run after the
 /// migration that introduces it).
+///
+/// Parent IDs are resolved through prefetched maps so the backfill stays O(N).
 pub async fn reindex_all(pool: &SqlitePool) -> AppResult<()> {
     sqlx::query("DELETE FROM search_index")
         .execute(pool)
         .await?;
 
-    let projects = sqlx::query_as::<_, Project>(
-        "SELECT id, title, description, description_format,
-                sort_order, created_at, updated_at, deleted_at
-           FROM projects WHERE deleted_at IS NULL",
-    )
+    let projects = sqlx::query_as::<_, Project>(&format!(
+        "SELECT {} FROM projects WHERE deleted_at IS NULL",
+        db::projects::COLS
+    ))
     .fetch_all(pool)
     .await?;
     for project in &projects {
         index_project(pool, project).await?;
     }
 
-    let stories = sqlx::query_as::<_, Story>(
-        "SELECT id, project_id, title, description, description_format, status,
-                sort_order, created_at, updated_at, deleted_at,
-                started_at, completed_at, due_date
-           FROM stories WHERE deleted_at IS NULL",
-    )
+    let stories = sqlx::query_as::<_, Story>(&format!(
+        "SELECT {} FROM stories WHERE deleted_at IS NULL",
+        db::stories::COLS
+    ))
     .fetch_all(pool)
     .await?;
+    let story_to_project: HashMap<String, String> = stories
+        .iter()
+        .map(|s| (s.id.clone(), s.project_id.clone()))
+        .collect();
     for story in &stories {
         index_story(pool, story).await?;
     }
 
-    let tasks = sqlx::query_as::<_, Task>(
-        "SELECT id, story_id, parent_task_id, title, description, description_format,
-                result, result_format, status, sort_order, created_at, updated_at, deleted_at,
-                started_at, completed_at, due_date
-           FROM tasks WHERE deleted_at IS NULL",
-    )
+    let tasks = sqlx::query_as::<_, Task>(&format!(
+        "SELECT {} FROM tasks WHERE deleted_at IS NULL",
+        db::tasks::COLS
+    ))
     .fetch_all(pool)
     .await?;
+    let task_to_path: HashMap<String, (Option<String>, String)> = tasks
+        .iter()
+        .map(|t| {
+            (
+                t.id.clone(),
+                (story_to_project.get(&t.story_id).cloned(), t.story_id.clone()),
+            )
+        })
+        .collect();
     for task in &tasks {
-        index_task(pool, task).await?;
+        let project_id = story_to_project.get(&task.story_id).cloned();
+        upsert(pool, task_entry(task, project_id)).await?;
     }
 
-    let notes = sqlx::query_as::<_, Note>(
-        "SELECT id, project_id, title, body, body_format,
-                sort_order, created_at, updated_at, deleted_at
-           FROM notes WHERE deleted_at IS NULL",
-    )
+    let notes = sqlx::query_as::<_, Note>(&format!(
+        "SELECT {} FROM notes WHERE deleted_at IS NULL",
+        db::notes::COLS
+    ))
     .fetch_all(pool)
     .await?;
     for note in &notes {
         index_note(pool, note).await?;
     }
 
-    let comments = sqlx::query_as::<_, Comment>(
-        "SELECT id, task_id, body, body_format, created_at, updated_at, deleted_at
-           FROM comments WHERE deleted_at IS NULL",
-    )
+    let comments = sqlx::query_as::<_, Comment>(&format!(
+        "SELECT {} FROM comments WHERE deleted_at IS NULL",
+        db::comments::COLS
+    ))
     .fetch_all(pool)
     .await?;
     for comment in &comments {
-        index_comment(pool, comment).await?;
+        let (project_id, story_id) = task_to_path
+            .get(&comment.task_id)
+            .cloned()
+            .map(|(p, s)| (p, Some(s)))
+            .unwrap_or((None, None));
+        upsert(pool, comment_entry(comment, project_id, story_id)).await?;
     }
 
     Ok(())
@@ -319,6 +341,36 @@ mod tests {
         assert_eq!(query::search(&pool, "removable", 10).await.unwrap().len(), 1);
         remove(&pool, EntityKind::Project, "p1").await.unwrap();
         assert_eq!(query::search(&pool, "removable", 10).await.unwrap().len(), 0);
+    }
+
+    #[tokio::test]
+    async fn reindex_all_repopulates_after_wipe() {
+        let pool = setup().await;
+        // Seed three projects through the normal write path.
+        for (i, t) in ["alpha plan", "beta plan", "gamma plan"].iter().enumerate() {
+            index_project(&pool, &proj(&format!("p{i}"), t, ""))
+                .await
+                .unwrap();
+        }
+        // We have to mirror them in the actual `projects` table so reindex_all sees them.
+        for (i, t) in ["alpha plan", "beta plan", "gamma plan"].iter().enumerate() {
+            sqlx::query(
+                "INSERT INTO projects (id, title, description, description_format,
+                                       sort_order, created_at, updated_at)
+                 VALUES (?1, ?2, '', 'plaintext', 0, '2026-01-01', '2026-01-01')",
+            )
+            .bind(format!("p{i}"))
+            .bind(t)
+            .execute(&pool)
+            .await
+            .unwrap();
+        }
+        // Wipe the FTS table and re-run the backfill.
+        sqlx::query("DELETE FROM search_index").execute(&pool).await.unwrap();
+        assert_eq!(query::search(&pool, "plan", 10).await.unwrap().len(), 0);
+
+        reindex_all(&pool).await.unwrap();
+        assert_eq!(query::search(&pool, "plan", 10).await.unwrap().len(), 3);
     }
 
     #[tokio::test]

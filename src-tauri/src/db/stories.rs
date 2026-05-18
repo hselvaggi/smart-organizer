@@ -5,15 +5,17 @@ use crate::domain::{NewStory, Story, UpdateStory};
 use crate::error::{AppError, AppResult};
 use crate::search;
 
+pub(crate) const COLS: &str = "id, project_id, title, description, description_format, status,
+                               sort_order, created_at, updated_at, deleted_at,
+                               started_at, completed_at, due_date";
+
 pub async fn list_for_project(pool: &SqlitePool, project_id: &str) -> AppResult<Vec<Story>> {
-    let rows = sqlx::query_as::<_, Story>(
-        "SELECT id, project_id, title, description, description_format, status,
-                sort_order, created_at, updated_at, deleted_at,
-                started_at, completed_at, due_date
+    let rows = sqlx::query_as::<_, Story>(&format!(
+        "SELECT {COLS}
          FROM stories
          WHERE project_id = ?1 AND deleted_at IS NULL
-         ORDER BY sort_order, created_at",
-    )
+         ORDER BY sort_order, created_at"
+    ))
     .bind(project_id)
     .fetch_all(pool)
     .await?;
@@ -21,13 +23,11 @@ pub async fn list_for_project(pool: &SqlitePool, project_id: &str) -> AppResult<
 }
 
 pub async fn get(pool: &SqlitePool, id: &str) -> AppResult<Option<Story>> {
-    let row = sqlx::query_as::<_, Story>(
-        "SELECT id, project_id, title, description, description_format, status,
-                sort_order, created_at, updated_at, deleted_at,
-                started_at, completed_at, due_date
+    let row = sqlx::query_as::<_, Story>(&format!(
+        "SELECT {COLS}
          FROM stories
-         WHERE id = ?1 AND deleted_at IS NULL",
-    )
+         WHERE id = ?1 AND deleted_at IS NULL"
+    ))
     .bind(id)
     .fetch_optional(pool)
     .await?;

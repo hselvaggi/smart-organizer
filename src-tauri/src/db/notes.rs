@@ -5,25 +5,28 @@ use crate::domain::{NewNote, Note, UpdateNote};
 use crate::error::{AppError, AppResult};
 use crate::search;
 
+pub(crate) const COLS: &str = "id, project_id, title, body, body_format,
+                               sort_order, created_at, updated_at, deleted_at";
+
 pub async fn list_standalone(pool: &SqlitePool) -> AppResult<Vec<Note>> {
-    let rows = sqlx::query_as::<_, Note>(
-        "SELECT id, project_id, title, body, body_format, sort_order, created_at, updated_at, deleted_at
+    let rows = sqlx::query_as::<_, Note>(&format!(
+        "SELECT {COLS}
          FROM notes
          WHERE deleted_at IS NULL AND project_id IS NULL
-         ORDER BY updated_at DESC",
-    )
+         ORDER BY updated_at DESC"
+    ))
     .fetch_all(pool)
     .await?;
     Ok(rows)
 }
 
 pub async fn list_for_project(pool: &SqlitePool, project_id: &str) -> AppResult<Vec<Note>> {
-    let rows = sqlx::query_as::<_, Note>(
-        "SELECT id, project_id, title, body, body_format, sort_order, created_at, updated_at, deleted_at
+    let rows = sqlx::query_as::<_, Note>(&format!(
+        "SELECT {COLS}
          FROM notes
          WHERE deleted_at IS NULL AND project_id = ?1
-         ORDER BY updated_at DESC",
-    )
+         ORDER BY updated_at DESC"
+    ))
     .bind(project_id)
     .fetch_all(pool)
     .await?;
@@ -31,11 +34,11 @@ pub async fn list_for_project(pool: &SqlitePool, project_id: &str) -> AppResult<
 }
 
 pub async fn get(pool: &SqlitePool, id: &str) -> AppResult<Option<Note>> {
-    let row = sqlx::query_as::<_, Note>(
-        "SELECT id, project_id, title, body, body_format, sort_order, created_at, updated_at, deleted_at
+    let row = sqlx::query_as::<_, Note>(&format!(
+        "SELECT {COLS}
          FROM notes
-         WHERE id = ?1 AND deleted_at IS NULL",
-    )
+         WHERE id = ?1 AND deleted_at IS NULL"
+    ))
     .bind(id)
     .fetch_optional(pool)
     .await?;

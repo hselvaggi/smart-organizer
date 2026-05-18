@@ -5,26 +5,27 @@ use crate::domain::{NewProject, Project, UpdateProject};
 use crate::error::{AppError, AppResult};
 use crate::search;
 
+pub(crate) const COLS: &str = "id, title, description, description_format,
+                               sort_order, created_at, updated_at, deleted_at";
+
 pub async fn list_all(pool: &SqlitePool) -> AppResult<Vec<Project>> {
-    let rows = sqlx::query_as::<_, Project>(
-        "SELECT id, title, description, description_format,
-                sort_order, created_at, updated_at, deleted_at
+    let rows = sqlx::query_as::<_, Project>(&format!(
+        "SELECT {COLS}
          FROM projects
          WHERE deleted_at IS NULL
-         ORDER BY sort_order, created_at",
-    )
+         ORDER BY sort_order, created_at"
+    ))
     .fetch_all(pool)
     .await?;
     Ok(rows)
 }
 
 pub async fn get(pool: &SqlitePool, id: &str) -> AppResult<Option<Project>> {
-    let row = sqlx::query_as::<_, Project>(
-        "SELECT id, title, description, description_format,
-                sort_order, created_at, updated_at, deleted_at
+    let row = sqlx::query_as::<_, Project>(&format!(
+        "SELECT {COLS}
          FROM projects
-         WHERE id = ?1 AND deleted_at IS NULL",
-    )
+         WHERE id = ?1 AND deleted_at IS NULL"
+    ))
     .bind(id)
     .fetch_optional(pool)
     .await?;

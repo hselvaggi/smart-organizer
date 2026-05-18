@@ -5,13 +5,15 @@ use crate::domain::{Comment, NewComment};
 use crate::error::{AppError, AppResult};
 use crate::search;
 
+pub(crate) const COLS: &str = "id, task_id, body, body_format, created_at, updated_at, deleted_at";
+
 pub async fn list_for_task(pool: &SqlitePool, task_id: &str) -> AppResult<Vec<Comment>> {
-    let rows = sqlx::query_as::<_, Comment>(
-        "SELECT id, task_id, body, body_format, created_at, updated_at, deleted_at
+    let rows = sqlx::query_as::<_, Comment>(&format!(
+        "SELECT {COLS}
          FROM comments
          WHERE task_id = ?1 AND deleted_at IS NULL
-         ORDER BY created_at",
-    )
+         ORDER BY created_at"
+    ))
     .bind(task_id)
     .fetch_all(pool)
     .await?;
@@ -33,10 +35,9 @@ pub async fn create(pool: &SqlitePool, input: NewComment) -> AppResult<Comment> 
     .execute(pool)
     .await?;
 
-    let row = sqlx::query_as::<_, Comment>(
-        "SELECT id, task_id, body, body_format, created_at, updated_at, deleted_at
-         FROM comments WHERE id = ?1",
-    )
+    let row = sqlx::query_as::<_, Comment>(&format!(
+        "SELECT {COLS} FROM comments WHERE id = ?1"
+    ))
     .bind(&id)
     .fetch_optional(pool)
     .await?;

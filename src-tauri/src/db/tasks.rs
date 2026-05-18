@@ -5,15 +5,21 @@ use crate::domain::{NewTask, Task, UpdateTask};
 use crate::error::{AppError, AppResult};
 use crate::search;
 
+pub(crate) const COLS: &str = "id, story_id, parent_task_id, title, description, description_format,
+                               result, result_format, status, sort_order, created_at, updated_at, deleted_at,
+                               started_at, completed_at, due_date";
+
+const COLS_T: &str = "t.id, t.story_id, t.parent_task_id, t.title, t.description, t.description_format,
+                      t.result, t.result_format, t.status, t.sort_order, t.created_at, t.updated_at, t.deleted_at,
+                      t.started_at, t.completed_at, t.due_date";
+
 pub async fn list_for_story(pool: &SqlitePool, story_id: &str) -> AppResult<Vec<Task>> {
-    let rows = sqlx::query_as::<_, Task>(
-        "SELECT id, story_id, parent_task_id, title, description, description_format,
-                result, result_format, status, sort_order, created_at, updated_at, deleted_at,
-                started_at, completed_at, due_date
+    let rows = sqlx::query_as::<_, Task>(&format!(
+        "SELECT {COLS}
          FROM tasks
          WHERE story_id = ?1 AND deleted_at IS NULL
-         ORDER BY sort_order, created_at",
-    )
+         ORDER BY sort_order, created_at"
+    ))
     .bind(story_id)
     .fetch_all(pool)
     .await?;
@@ -21,15 +27,13 @@ pub async fn list_for_story(pool: &SqlitePool, story_id: &str) -> AppResult<Vec<
 }
 
 pub async fn list_for_project(pool: &SqlitePool, project_id: &str) -> AppResult<Vec<Task>> {
-    let rows = sqlx::query_as::<_, Task>(
-        "SELECT t.id, t.story_id, t.parent_task_id, t.title, t.description, t.description_format,
-                t.result, t.result_format, t.status, t.sort_order, t.created_at, t.updated_at, t.deleted_at,
-                t.started_at, t.completed_at, t.due_date
+    let rows = sqlx::query_as::<_, Task>(&format!(
+        "SELECT {COLS_T}
          FROM tasks t
          JOIN stories s ON t.story_id = s.id
          WHERE s.project_id = ?1 AND t.deleted_at IS NULL AND s.deleted_at IS NULL
-         ORDER BY t.sort_order, t.created_at",
-    )
+         ORDER BY t.sort_order, t.created_at"
+    ))
     .bind(project_id)
     .fetch_all(pool)
     .await?;
@@ -37,13 +41,11 @@ pub async fn list_for_project(pool: &SqlitePool, project_id: &str) -> AppResult<
 }
 
 pub async fn get(pool: &SqlitePool, id: &str) -> AppResult<Option<Task>> {
-    let row = sqlx::query_as::<_, Task>(
-        "SELECT id, story_id, parent_task_id, title, description, description_format,
-                result, result_format, status, sort_order, created_at, updated_at, deleted_at,
-                started_at, completed_at, due_date
+    let row = sqlx::query_as::<_, Task>(&format!(
+        "SELECT {COLS}
          FROM tasks
-         WHERE id = ?1 AND deleted_at IS NULL",
-    )
+         WHERE id = ?1 AND deleted_at IS NULL"
+    ))
     .bind(id)
     .fetch_optional(pool)
     .await?;
