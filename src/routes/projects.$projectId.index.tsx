@@ -71,7 +71,7 @@ function ProjectDetail() {
     setTitle(project.title);
     setDescription(project.description);
     setDescriptionFormat(project.descriptionFormat);
-  }, [project]);
+  }, [project?.id]);
 
   const items: BreadcrumbItem[] = [
     { label: t("nav.projects"), to: "/" },

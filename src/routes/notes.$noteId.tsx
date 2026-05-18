@@ -37,7 +37,7 @@ function NoteDetail() {
     setTitle(note.title);
     setBody(note.body);
     setBodyFormat(note.bodyFormat);
-  }, [note]);
+  }, [note?.id]);
 
   const items: BreadcrumbItem[] = note?.projectId
     ? [

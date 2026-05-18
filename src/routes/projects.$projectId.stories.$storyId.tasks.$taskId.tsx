@@ -74,7 +74,7 @@ function TaskDetail() {
     setResultFormat(task.resultFormat);
     setStatus(task.status);
     setDueDate(task.dueDate ?? "");
-  }, [task]);
+  }, [task?.id]);
 
   const ancestors = task ? ancestorTasks(task, storyTasks ?? []) : [];
   const subtasks = (storyTasks ?? []).filter((t) => t.parentTaskId === taskId);

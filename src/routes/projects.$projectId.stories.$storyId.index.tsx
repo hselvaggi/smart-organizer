@@ -85,7 +85,7 @@ function StoryDetail() {
     setDescriptionFormat(story.descriptionFormat);
     setStatus(story.status);
     setDueDate(story.dueDate ?? "");
-  }, [story]);
+  }, [story?.id]);
 
   const topLevel = (tasks ?? []).filter((t) => !t.parentTaskId);
   const subtaskCount = (id: string) =>
