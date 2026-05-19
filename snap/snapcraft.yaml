@@ -1,0 +1,70 @@
+name: smart-organizer
+base: core24
+version: '0.1.0'
+summary: Local-first task manager with rich-text notes
+description: |
+  A cross-platform desktop tool that organises projects, stories and tasks
+  with markdown / LaTeX descriptions, comments, standalone notes and a
+  drag-and-drop kanban board. Your data stays on your machine.
+
+  An optional MCP server (off by default) lets local AI agents read or
+  update your data on 127.0.0.1 only.
+
+grade: stable
+confinement: strict
+license: LicenseRef-PolyForm-Noncommercial-1.0.0
+
+platforms:
+  amd64:
+
+apps:
+  smart-organizer:
+    command: bin/smart-organizer
+    extensions:
+      - gnome
+    plugs:
+      - home
+      - network
+      - network-bind
+      - removable-media
+      - opengl
+
+parts:
+  smart-organizer:
+    plugin: nil
+    source: .
+    build-snaps:
+      - node/20/stable
+      - rustup
+    build-packages:
+      - build-essential
+      - curl
+      - file
+      - libayatana-appindicator3-dev
+      - librsvg2-dev
+      - libssl-dev
+      - libwebkit2gtk-4.1-dev
+      - libxdo-dev
+      - pkg-config
+      - wget
+    stage-packages:
+      - libayatana-appindicator3-1
+      - libwebkit2gtk-4.1-0
+      - librsvg2-2
+      - libxdo3
+    override-build: |
+      set -eux
+      # Toolchains
+      rustup default stable
+      corepack enable
+      corepack prepare pnpm@latest --activate
+
+      # Build frontend + Tauri binary (no bundling — we install the bare
+      # binary into the snap ourselves)
+      pnpm install --frozen-lockfile
+      pnpm tauri build --no-bundle
+
+      # Install the binary under the snap's bin/ dir, renamed to match the
+      # snap app name
+      install -Dm755 src-tauri/target/release/tasks \
+        "$CRAFT_PART_INSTALL/bin/smart-organizer"

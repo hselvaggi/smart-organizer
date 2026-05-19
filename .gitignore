@@ -18,6 +18,13 @@ scripts/setup-github-token.sh
 src-tauri/target/
 src-tauri/gen/
 
+# Snapcraft build outputs
+parts/
+stage/
+prime/
+snap/.snapcraft/
+*.snap
+
 # Editors
 .vscode/*
 !.vscode/extensions.json
