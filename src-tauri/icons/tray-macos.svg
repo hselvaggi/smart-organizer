@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- macOS menu bar template image: pure black + alpha, designed at 22pt (44px @2x). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44">
+  <!-- Notepad body -->
+  <rect x="9" y="11.5" width="26" height="28" rx="3" ry="3"
+        fill="none" stroke="#000" stroke-width="2.2"/>
+
+  <!-- Rule lines -->
+  <g stroke="#000" stroke-width="1.7" stroke-linecap="round">
+    <line x1="13.5" y1="20"   x2="30.5" y2="20"/>
+    <line x1="13.5" y1="25.5" x2="30.5" y2="25.5"/>
+    <line x1="13.5" y1="31"   x2="30.5" y2="31"/>
+    <line x1="13.5" y1="36.5" x2="24"   y2="36.5"/>
+  </g>
+
+  <!-- Spiral binding -->
+  <g fill="#000">
+    <circle cx="14"   cy="9.5" r="1.9"/>
+    <circle cx="20.5" cy="9.5" r="1.9"/>
+    <circle cx="27"   cy="9.5" r="1.9"/>
+    <circle cx="33.5" cy="9.5" r="1.9"/>
+  </g>
+</svg>

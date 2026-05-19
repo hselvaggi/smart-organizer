@@ -86,13 +86,19 @@ pub fn run() {
             let quit_item = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&show_item, &quit_item])?;
 
-            let icon = app
+            // macOS menu bar expects a template image (black + alpha) so the
+            // system can recolour it for light/dark mode. Linux/Windows keep
+            // the full-colour default window icon.
+            #[cfg(target_os = "macos")]
+            let tray_icon = tauri::include_image!("icons/tray-macos.png");
+            #[cfg(not(target_os = "macos"))]
+            let tray_icon = app
                 .default_window_icon()
                 .ok_or("missing default window icon")?
                 .clone();
 
-            let tray = TrayIconBuilder::with_id("main-tray")
-                .icon(icon)
+            let tray_builder = TrayIconBuilder::with_id("main-tray")
+                .icon(tray_icon)
                 .tooltip("Organizer")
                 .menu(&menu)
                 .show_menu_on_left_click(false)
@@ -110,8 +116,12 @@ pub fn run() {
                     {
                         reveal_main_window(tray.app_handle());
                     }
-                })
-                .build(app)?;
+                });
+
+            #[cfg(target_os = "macos")]
+            let tray_builder = tray_builder.icon_as_template(true);
+
+            let tray = tray_builder.build(app)?;
             // Keep the tray alive for the lifetime of the app so libappindicator
             // doesn't intermittently lose track of the menu items.
             app.manage(tray);

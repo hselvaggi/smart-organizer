@@ -9,6 +9,7 @@ tsconfig.tsbuildinfo
 
 # Screenshots / scratch
 *.png
+!src-tauri/icons/tray-macos.png
 resume.txt
 
 # Local helper scripts (contain or handle secrets-adjacent state)
