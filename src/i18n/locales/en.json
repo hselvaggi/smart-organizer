@@ -84,6 +84,7 @@
     "indexHeading": "Projects",
     "indexSubtitle": "Top-level workspaces for your tasks",
     "newProject": "New project",
+    "newCrumb": "New project",
     "emptyTitle": "No projects yet",
     "emptyHelp": "Create your first project to start tracking stories and tasks.",
     "boardButton": "Board",
@@ -98,6 +99,7 @@
     "emptyDescription": "No description yet — click to add one."
   },
   "stories": {
+    "newCrumb": "New story",
     "addTask": "Add task",
     "noTasks": "No tasks yet — break this story down with \"Add task\".",
     "deleteAria": "Delete story",
@@ -106,6 +108,8 @@
     "emptyDescription": "No description yet — click to add one."
   },
   "tasks": {
+    "newCrumb": "New task",
+    "newSubtaskCrumb": "New subtask",
     "addSubtask": "Add subtask",
     "noSubtasks": "No subtasks yet — break this task down with \"Add subtask\".",
     "deleteAria": "Delete task",
@@ -128,6 +132,7 @@
     "indexHeading": "Notes",
     "indexSubtitle": "Standalone notes, independent of projects and tasks.",
     "newNote": "New note",
+    "newCrumb": "New note",
     "emptyTitle": "No notes yet",
     "emptyHelp": "Notes live outside the project hierarchy — use them for quick thoughts, references or one-off context.",
     "bodyPlaceholder": "Write your note here…",
@@ -151,6 +156,18 @@
       "description": "Choose the language used across the app.",
       "english": "English",
       "spanish": "Español"
+    },
+    "appearance": {
+      "heading": "Appearance",
+      "description": "Choose a colour theme. \"System\" follows your OS light/dark preference automatically.",
+      "themes": {
+        "system": "System",
+        "light": "Light",
+        "sepia": "Sepia",
+        "dim": "Dim",
+        "contrast": "High contrast",
+        "dark": "Dark"
+      }
     },
     "deadlines": {
       "heading": "Deadlines",

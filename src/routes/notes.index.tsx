@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { ChevronRight, NotebookPen, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  useCreateNote,
   useDeleteNote,
   useNotes,
 } from "@/lib/queries/notes";
@@ -17,17 +16,10 @@ function NotesIndex() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: notes, isLoading } = useNotes();
-  const create = useCreateNote();
   const remove = useDeleteNote();
 
-  const handleAdd = async () => {
-    const created = await create.mutateAsync({
-      title: t("common.untitledNote"),
-      body: "",
-      bodyFormat: "plaintext",
-      projectId: null,
-    });
-    navigate({ to: "/notes/$noteId", params: { noteId: created.id } });
+  const handleAdd = () => {
+    navigate({ to: "/notes/$noteId", params: { noteId: "new" } });
   };
 
   return (

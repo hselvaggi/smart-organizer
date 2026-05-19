@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ApplicationSection } from "@/components/settings/application-section";
+import { AppearanceSection } from "@/components/settings/appearance-section";
 import { DangerZoneSection } from "@/components/settings/danger-zone-section";
 import { DeadlinesSection } from "@/components/settings/deadlines-section";
 import { LanguageSection } from "@/components/settings/language-section";
@@ -22,6 +23,7 @@ function SettingsPage() {
       </header>
 
       <LanguageSection />
+      <AppearanceSection />
       <DeadlinesSection />
       <McpSection />
       <ApplicationSection />

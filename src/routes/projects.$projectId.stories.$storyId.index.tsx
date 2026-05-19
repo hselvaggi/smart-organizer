@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import {
   ChevronRight,
   FileText,
   ListTree,
-  Plus,
   Save,
   Trash2,
 } from "lucide-react";
@@ -19,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Breadcrumb, type BreadcrumbItem } from "@/components/breadcrumb";
+import { ListSection } from "@/components/list-section";
 import { RichTextField } from "@/components/rich-text-field";
 import { StatusIcon, nextStatus } from "@/components/task/task-status";
 import { Timeline } from "@/components/timeline";
@@ -30,17 +30,17 @@ import {
 } from "@/lib/deadline";
 import { useProject } from "@/lib/queries/projects";
 import {
+  useCreateStory,
   useDeleteStory,
   useStory,
   useUpdateStory,
 } from "@/lib/queries/stories";
 import {
-  useCreateTask,
   useDeleteTask,
   useTasks,
   useUpdateTask,
 } from "@/lib/queries/tasks";
-import type { Task, TaskStatus, TextFormat } from "@/types/generated";
+import type { TaskStatus, TextFormat } from "@/types/generated";
 
 const STATUSES: TaskStatus[] = [
   "todo",
@@ -59,15 +59,17 @@ export const Route = createFileRoute(
 function StoryDetail() {
   const { t } = useTranslation();
   const { projectId, storyId } = Route.useParams();
+  const isCreating = storyId === "new";
   const navigate = useNavigate();
+  const [yellowDays] = useYellowDays();
 
   const { data: project } = useProject(projectId);
-  const { data: story } = useStory(storyId);
-  const { data: tasks } = useTasks(storyId);
+  const { data: story } = useStory(isCreating ? "" : storyId);
+  const { data: tasks } = useTasks(isCreating ? "" : storyId);
 
+  const create = useCreateStory(projectId);
   const update = useUpdateStory(projectId);
   const removeStory = useDeleteStory(projectId);
-  const createTask = useCreateTask(storyId);
   const updateTask = useUpdateTask(storyId);
   const removeTask = useDeleteTask(storyId);
 
@@ -77,15 +79,20 @@ function StoryDetail() {
     useState<TextFormat>("plaintext");
   const [status, setStatus] = useState<TaskStatus>("todo");
   const [dueDate, setDueDate] = useState<string>("");
+  const titleRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!story) return;
+    if (isCreating) titleRef.current?.focus();
+  }, [isCreating]);
+
+  useEffect(() => {
+    if (isCreating || !story) return;
     setTitle(story.title);
     setDescription(story.description);
     setDescriptionFormat(story.descriptionFormat);
     setStatus(story.status);
     setDueDate(story.dueDate ?? "");
-  }, [story?.id]);
+  }, [story?.id, isCreating]);
 
   const topLevel = (tasks ?? []).filter((t) => !t.parentTaskId);
   const subtaskCount = (id: string) =>
@@ -98,13 +105,29 @@ function StoryDetail() {
       to: "/projects/$projectId",
       params: { projectId },
     },
-    { label: story?.title ?? "…" },
+    { label: isCreating ? t("stories.newCrumb") : (story?.title ?? "…") },
   ];
 
-  const canSave = !!story && title.trim().length > 0 && !update.isPending;
+  const canSubmit =
+    title.trim().length > 0 && !update.isPending && !create.isPending;
 
-  const handleSave = async () => {
-    if (!story || !canSave) return;
+  const handleSubmit = async () => {
+    if (!canSubmit) return;
+    if (isCreating) {
+      const created = await create.mutateAsync({
+        projectId,
+        title: title.trim(),
+        description,
+        descriptionFormat,
+      });
+      navigate({
+        to: "/projects/$projectId/stories/$storyId",
+        params: { projectId, storyId: created.id },
+        replace: true,
+      });
+      return;
+    }
+    if (!story) return;
     await update.mutateAsync({
       id: story.id,
       title: title.trim(),
@@ -121,21 +144,14 @@ function StoryDetail() {
     navigate({ to: "/projects/$projectId", params: { projectId } });
   };
 
-  const handleAddTask = async () => {
-    const created = await createTask.mutateAsync({
-      storyId,
-      title: t("common.untitledTask"),
-      description: "",
-      descriptionFormat: "plaintext",
-      parentTaskId: null,
-    });
+  const handleAddTask = () => {
     navigate({
       to: "/projects/$projectId/stories/$storyId/tasks/$taskId",
-      params: { projectId, storyId, taskId: created.id },
+      params: { projectId, storyId, taskId: "new" },
     });
   };
 
-  if (!story) {
+  if (!isCreating && !story) {
     return (
       <div className="flex h-full flex-col gap-6 p-8">
         <Breadcrumb items={items} />
@@ -147,28 +163,41 @@ function StoryDetail() {
   return (
     <div className="flex h-full flex-col gap-6 overflow-y-auto p-8">
       <Breadcrumb items={items} />
-      <Timeline startedAt={story.startedAt} completedAt={story.completedAt} />
+      {!isCreating && story && (
+        <Timeline startedAt={story.startedAt} completedAt={story.completedAt} />
+      )}
 
       <header className="flex items-start justify-between gap-4">
         <Input
+          ref={titleRef}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder={t("fields.title")}
           className="flex-1 text-xl font-semibold"
         />
         <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={handleDelete}
-            aria-label={t("stories.deleteAria")}
-          >
-            <Trash2 />
-            {t("common.delete")}
-          </Button>
-          <Button type="button" onClick={handleSave} disabled={!canSave}>
+          {!isCreating && (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleDelete}
+              aria-label={t("stories.deleteAria")}
+            >
+              <Trash2 />
+              {t("common.delete")}
+            </Button>
+          )}
+          <Button type="button" onClick={handleSubmit} disabled={!canSubmit}>
             <Save />
-            {t(update.isPending ? "common.saving" : "common.save")}
+            {t(
+              isCreating
+                ? create.isPending
+                  ? "common.creating"
+                  : "common.create"
+                : update.isPending
+                  ? "common.saving"
+                  : "common.save",
+            )}
           </Button>
         </div>
       </header>
@@ -184,89 +213,14 @@ function StoryDetail() {
           emptyLabel={t("stories.emptyDescription")}
         />
 
-        <TasksSection
-          tasks={topLevel}
-          subtaskCount={subtaskCount}
-          onOpen={(id) =>
-            navigate({
-              to: "/projects/$projectId/stories/$storyId/tasks/$taskId",
-              params: { projectId, storyId, taskId: id },
-            })
-          }
+        {!isCreating && (
+          <ListSection
+          title={t("fields.tasks")}
+          addLabel={t("stories.addTask")}
           onAdd={handleAddTask}
-          onToggle={(t) =>
-            updateTask.mutate({ id: t.id, status: nextStatus(t.status) })
-          }
-          onDelete={(id) => removeTask.mutate(id)}
-        />
-
-        <div className="flex flex-wrap gap-4">
-          <Field label={t("fields.status")}>
-            <Select
-              value={status}
-              onValueChange={(v) => setStatus(v as TaskStatus)}
-            >
-              <SelectTrigger className="w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {t(`status.${s}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-
-          <Field label={t("fields.dueDate")}>
-            <Input
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              className="w-48"
-            />
-          </Field>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function TasksSection({
-  tasks,
-  subtaskCount,
-  onOpen,
-  onAdd,
-  onToggle,
-  onDelete,
-}: {
-  tasks: Task[];
-  subtaskCount: (id: string) => number;
-  onOpen: (id: string) => void;
-  onAdd: () => void;
-  onToggle: (t: Task) => void;
-  onDelete: (id: string) => void;
-}) {
-  const { t } = useTranslation();
-  const [yellowDays] = useYellowDays();
-  return (
-    <section className="flex flex-col gap-2 border-t border-border pt-4">
-      <header className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">{t("fields.tasks")}</h3>
-        <Button type="button" size="sm" variant="outline" onClick={onAdd}>
-          <Plus />
-          {t("stories.addTask")}
-        </Button>
-      </header>
-
-      {tasks.length === 0 ? (
-        <p className="rounded-md border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-          {t("stories.noTasks")}
-        </p>
-      ) : (
-        <ul className="flex flex-col gap-1">
-          {tasks.map((task) => (
+          items={topLevel}
+          emptyLabel={t("stories.noTasks")}
+          renderItem={(task) => (
             <li
               key={task.id}
               className={cn(
@@ -279,18 +233,30 @@ function TasksSection({
                   type="button"
                   size="icon"
                   variant="ghost"
-                  onClick={() => onToggle(task)}
+                  onClick={() =>
+                    updateTask.mutate({
+                      id: task.id,
+                      status: nextStatus(task.status),
+                    })
+                  }
                   aria-label={t("tasks.toggleStatusAria")}
                 >
                   <StatusIcon status={task.status} />
                 </Button>
                 <button
                   type="button"
-                  onClick={() => onOpen(task.id)}
+                  onClick={() =>
+                    navigate({
+                      to: "/projects/$projectId/stories/$storyId/tasks/$taskId",
+                      params: { projectId, storyId, taskId: task.id },
+                    })
+                  }
                   className="flex flex-1 items-center gap-2 text-left text-sm"
                 >
                   <span
-                    className={task.status === "done" ? "line-through opacity-60" : ""}
+                    className={
+                      task.status === "done" ? "line-through opacity-60" : ""
+                    }
                   >
                     {task.title}
                   </span>
@@ -313,17 +279,49 @@ function TasksSection({
                   size="icon"
                   variant="ghost"
                   className="opacity-0 transition-opacity group-hover:opacity-100"
-                  onClick={() => onDelete(task.id)}
+                  onClick={() => removeTask.mutate(task.id)}
                   aria-label={t("stories.deleteTaskAria")}
                 >
                   <Trash2 />
                 </Button>
               </div>
             </li>
-          ))}
-        </ul>
-      )}
-    </section>
+          )}
+          />
+        )}
+
+        {!isCreating && (
+          <div className="flex flex-wrap gap-4">
+            <Field label={t("fields.status")}>
+              <Select
+                value={status}
+                onValueChange={(v) => setStatus(v as TaskStatus)}
+              >
+                <SelectTrigger className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {STATUSES.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {t(`status.${s}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+
+            <Field label={t("fields.dueDate")}>
+              <Input
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="w-48"
+              />
+            </Field>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

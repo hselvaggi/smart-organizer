@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  useCreateProject,
   useDeleteProject,
   useProjects,
 } from "@/lib/queries/projects";
@@ -22,19 +21,13 @@ export const Route = createFileRoute("/")({
 function ProjectsIndex() {
   const { t } = useTranslation();
   const { data: projects, isLoading } = useProjects();
-  const create = useCreateProject();
   const remove = useDeleteProject();
   const navigate = useNavigate();
 
-  const handleAdd = async () => {
-    const created = await create.mutateAsync({
-      title: t("common.untitledProject"),
-      description: "",
-      descriptionFormat: "plaintext",
-    });
+  const handleAdd = () => {
     navigate({
       to: "/projects/$projectId",
-      params: { projectId: created.id },
+      params: { projectId: "new" },
     });
   };
 

@@ -1,11 +1,34 @@
 <!doctype html>
-<html lang="es" class="dark">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark light" />
     <title>Smart-Organizer</title>
+    <script>
+      // Inlined pre-paint to avoid a flash of the wrong theme before React
+      // hydrates. Keep in sync with src/lib/theme.ts (storage key, theme names,
+      // and the "light = no class" rule).
+      (function () {
+        try {
+          var t = localStorage.getItem('tasks-theme') || 'system';
+          var allowed = ['system', 'light', 'sepia', 'dim', 'contrast', 'dark'];
+          if (allowed.indexOf(t) === -1) t = 'system';
+          var resolved = t === 'system'
+            ? (window.matchMedia
+              && window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light')
+            : t;
+          if (resolved !== 'light') {
+            document.documentElement.classList.add(resolved);
+          }
+        } catch (_) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

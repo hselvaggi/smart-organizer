@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { Save, Trash2 } from "lucide-react";
@@ -39,17 +39,25 @@ const STATUSES: TaskStatus[] = [
 export const Route = createFileRoute(
   "/projects/$projectId/stories/$storyId/tasks/$taskId",
 )({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { parent?: string } => ({
+    parent: typeof search.parent === "string" ? search.parent : undefined,
+  }),
   component: TaskDetail,
 });
 
 function TaskDetail() {
   const { t } = useTranslation();
   const { projectId, storyId, taskId } = Route.useParams();
+  const { parent: parentTaskIdFromSearch } = Route.useSearch();
+  const isCreating = taskId === "new";
+  const isCreatingSubtask = isCreating && !!parentTaskIdFromSearch;
   const navigate = useNavigate();
 
   const { data: project } = useProject(projectId);
   const { data: story } = useStory(storyId);
-  const { data: task } = useTask(taskId);
+  const { data: task } = useTask(isCreating ? "" : taskId);
   const { data: storyTasks } = useTasks(storyId);
 
   const update = useUpdateTask(storyId);
@@ -64,9 +72,14 @@ function TaskDetail() {
   const [resultFormat, setResultFormat] = useState<TextFormat>("plaintext");
   const [status, setStatus] = useState<TaskStatus>("todo");
   const [dueDate, setDueDate] = useState<string>("");
+  const titleRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!task) return;
+    if (isCreating) titleRef.current?.focus();
+  }, [isCreating]);
+
+  useEffect(() => {
+    if (isCreating || !task) return;
     setTitle(task.title);
     setDescription(task.description);
     setDescriptionFormat(task.descriptionFormat);
@@ -74,10 +87,28 @@ function TaskDetail() {
     setResultFormat(task.resultFormat);
     setStatus(task.status);
     setDueDate(task.dueDate ?? "");
-  }, [task?.id]);
+  }, [task?.id, isCreating]);
 
-  const ancestors = task ? ancestorTasks(task, storyTasks ?? []) : [];
-  const subtasks = (storyTasks ?? []).filter((t) => t.parentTaskId === taskId);
+  // When editing, walk up from the loaded task. When creating a subtask, walk
+  // up from the parent task referenced in the search params.
+  const ancestors = task
+    ? ancestorTasks(task, storyTasks ?? [])
+    : isCreatingSubtask
+      ? (() => {
+          const parent = (storyTasks ?? []).find(
+            (t) => t.id === parentTaskIdFromSearch,
+          );
+          if (!parent) return [];
+          return [...ancestorTasks(parent, storyTasks ?? []), parent];
+        })()
+      : [];
+  const subtasks = isCreating
+    ? []
+    : (storyTasks ?? []).filter((t) => t.parentTaskId === taskId);
+
+  const trailingLabel = isCreating
+    ? t(isCreatingSubtask ? "tasks.newSubtaskCrumb" : "tasks.newCrumb")
+    : (task?.title ?? "…");
 
   const items: BreadcrumbItem[] = [
     { label: t("nav.projects"), to: "/" },
@@ -96,13 +127,30 @@ function TaskDetail() {
       to: "/projects/$projectId/stories/$storyId/tasks/$taskId" as const,
       params: { projectId, storyId, taskId: a.id },
     })),
-    { label: task?.title ?? "…" },
+    { label: trailingLabel },
   ];
 
-  const canSave = !!task && title.trim().length > 0 && !update.isPending;
+  const canSubmit =
+    title.trim().length > 0 && !update.isPending && !create.isPending;
 
-  const handleSave = async () => {
-    if (!task || !canSave) return;
+  const handleSubmit = async () => {
+    if (!canSubmit) return;
+    if (isCreating) {
+      const created = await create.mutateAsync({
+        storyId,
+        title: title.trim(),
+        description,
+        descriptionFormat,
+        parentTaskId: parentTaskIdFromSearch ?? null,
+      });
+      navigate({
+        to: "/projects/$projectId/stories/$storyId/tasks/$taskId",
+        params: { projectId, storyId, taskId: created.id },
+        replace: true,
+      });
+      return;
+    }
+    if (!task) return;
     await update.mutateAsync({
       id: task.id,
       title: title.trim(),
@@ -124,22 +172,16 @@ function TaskDetail() {
     });
   };
 
-  const handleAddSubtask = async () => {
+  const handleAddSubtask = () => {
     if (!task) return;
-    const created = await create.mutateAsync({
-      storyId,
-      title: t("common.untitledSubtask"),
-      description: "",
-      descriptionFormat: "plaintext",
-      parentTaskId: task.id,
-    });
     navigate({
       to: "/projects/$projectId/stories/$storyId/tasks/$taskId",
-      params: { projectId, storyId, taskId: created.id },
+      params: { projectId, storyId, taskId: "new" },
+      search: { parent: task.id },
     });
   };
 
-  if (!task) {
+  if (!isCreating && !task) {
     return (
       <div className="flex h-full flex-col gap-6 p-8">
         <Breadcrumb items={items} />
@@ -151,28 +193,41 @@ function TaskDetail() {
   return (
     <div className="flex h-full flex-col gap-6 overflow-y-auto p-8">
       <Breadcrumb items={items} />
-      <Timeline startedAt={task.startedAt} completedAt={task.completedAt} />
+      {!isCreating && task && (
+        <Timeline startedAt={task.startedAt} completedAt={task.completedAt} />
+      )}
 
       <header className="flex items-start justify-between gap-4">
         <Input
+          ref={titleRef}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder={t("fields.title")}
           className="flex-1 text-xl font-semibold"
         />
         <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={handleDelete}
-            aria-label={t("tasks.deleteAria")}
-          >
-            <Trash2 />
-            {t("common.delete")}
-          </Button>
-          <Button type="button" onClick={handleSave} disabled={!canSave}>
+          {!isCreating && (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleDelete}
+              aria-label={t("tasks.deleteAria")}
+            >
+              <Trash2 />
+              {t("common.delete")}
+            </Button>
+          )}
+          <Button type="button" onClick={handleSubmit} disabled={!canSubmit}>
             <Save />
-            {t(update.isPending ? "common.saving" : "common.save")}
+            {t(
+              isCreating
+                ? create.isPending
+                  ? "common.creating"
+                  : "common.create"
+                : update.isPending
+                  ? "common.saving"
+                  : "common.save",
+            )}
           </Button>
         </div>
       </header>
@@ -188,62 +243,68 @@ function TaskDetail() {
           emptyLabel={t("tasks.emptyDescription")}
         />
 
-        <TaskSubtasks
-          subtasks={subtasks}
-          storyTasks={storyTasks ?? []}
-          onOpen={(id) =>
-            navigate({
-              to: "/projects/$projectId/stories/$storyId/tasks/$taskId",
-              params: { projectId, storyId, taskId: id },
-            })
-          }
-          onAdd={handleAddSubtask}
-          onToggle={(t) =>
-            update.mutate({ id: t.id, status: nextStatus(t.status) })
-          }
-          onDelete={(id) => remove.mutate(id)}
-        />
+        {!isCreating && (
+          <TaskSubtasks
+            subtasks={subtasks}
+            storyTasks={storyTasks ?? []}
+            onOpen={(id) =>
+              navigate({
+                to: "/projects/$projectId/stories/$storyId/tasks/$taskId",
+                params: { projectId, storyId, taskId: id },
+              })
+            }
+            onAdd={handleAddSubtask}
+            onToggle={(t) =>
+              update.mutate({ id: t.id, status: nextStatus(t.status) })
+            }
+            onDelete={(id) => remove.mutate(id)}
+          />
+        )}
 
-        <RichTextField
-          label={t("fields.result")}
-          value={result}
-          onChange={setResult}
-          format={resultFormat}
-          onFormatChange={setResultFormat}
-          placeholder={t("tasks.resultPlaceholder")}
-          emptyLabel={t("tasks.emptyResult")}
-        />
+        {!isCreating && (
+          <RichTextField
+            label={t("fields.result")}
+            value={result}
+            onChange={setResult}
+            format={resultFormat}
+            onFormatChange={setResultFormat}
+            placeholder={t("tasks.resultPlaceholder")}
+            emptyLabel={t("tasks.emptyResult")}
+          />
+        )}
 
-        <div className="flex flex-wrap gap-4">
-          <Field label={t("fields.status")}>
-            <Select
-              value={status}
-              onValueChange={(v) => setStatus(v as TaskStatus)}
-            >
-              <SelectTrigger className="w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {t(`status.${s}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
+        {!isCreating && (
+          <div className="flex flex-wrap gap-4">
+            <Field label={t("fields.status")}>
+              <Select
+                value={status}
+                onValueChange={(v) => setStatus(v as TaskStatus)}
+              >
+                <SelectTrigger className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {STATUSES.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {t(`status.${s}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
 
-          <Field label={t("fields.dueDate")}>
-            <Input
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              className="w-48"
-            />
-          </Field>
-        </div>
+            <Field label={t("fields.dueDate")}>
+              <Input
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="w-48"
+              />
+            </Field>
+          </div>
+        )}
 
-        <TaskComments taskId={taskId} />
+        {!isCreating && <TaskComments taskId={taskId} />}
       </div>
     </div>
   );

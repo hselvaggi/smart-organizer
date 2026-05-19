@@ -84,6 +84,7 @@
     "indexHeading": "Proyectos",
     "indexSubtitle": "Espacios de trabajo de nivel superior para tus tareas",
     "newProject": "Nuevo proyecto",
+    "newCrumb": "Nuevo proyecto",
     "emptyTitle": "Aún no tenés proyectos",
     "emptyHelp": "Creá tu primer proyecto para empezar a registrar stories y tareas.",
     "boardButton": "Tablero",
@@ -98,6 +99,7 @@
     "emptyDescription": "Aún no hay descripción — clic para agregarla."
   },
   "stories": {
+    "newCrumb": "Nueva story",
     "addTask": "Agregar tarea",
     "noTasks": "Aún no hay tareas — desglosá esta story con \"Agregar tarea\".",
     "deleteAria": "Borrar story",
@@ -106,6 +108,8 @@
     "emptyDescription": "Aún no hay descripción — clic para agregarla."
   },
   "tasks": {
+    "newCrumb": "Nueva tarea",
+    "newSubtaskCrumb": "Nueva subtarea",
     "addSubtask": "Agregar subtarea",
     "noSubtasks": "Aún no hay subtareas — desglosá esta tarea con \"Agregar subtarea\".",
     "deleteAria": "Borrar tarea",
@@ -128,6 +132,7 @@
     "indexHeading": "Notas",
     "indexSubtitle": "Notas independientes, sin vínculo con proyectos ni tareas.",
     "newNote": "Nueva nota",
+    "newCrumb": "Nueva nota",
     "emptyTitle": "Aún no tenés notas",
     "emptyHelp": "Las notas viven fuera de la jerarquía de proyectos — usalas para pensamientos rápidos, referencias o contexto puntual.",
     "bodyPlaceholder": "Escribí tu nota acá…",
@@ -151,6 +156,18 @@
       "description": "Elegí el idioma que usa la aplicación.",
       "english": "English",
       "spanish": "Español"
+    },
+    "appearance": {
+      "heading": "Apariencia",
+      "description": "Elegí un tema de color. \"Sistema\" sigue automáticamente la preferencia de claro/oscuro del sistema operativo.",
+      "themes": {
+        "system": "Sistema",
+        "light": "Claro",
+        "sepia": "Sepia",
+        "dim": "Atenuado",
+        "contrast": "Alto contraste",
+        "dark": "Oscuro"
+      }
     },
     "deadlines": {
       "heading": "Fechas límite",

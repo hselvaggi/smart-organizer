@@ -66,6 +66,103 @@
     --input: 217 19% 18%;
     --ring: 234 89% 70%;
   }
+
+  /* Softer dark for low-light evening work; mid-slate background instead of
+     near-black, less stark contrast. */
+  .dim {
+    --background: 220 14% 20%;
+    --foreground: 210 18% 92%;
+
+    --card: 220 14% 23%;
+    --card-foreground: 210 18% 92%;
+
+    --popover: 220 14% 22%;
+    --popover-foreground: 210 18% 92%;
+
+    --primary: 234 75% 70%;
+    --primary-foreground: 220 14% 18%;
+
+    --secondary: 220 12% 28%;
+    --secondary-foreground: 210 18% 92%;
+
+    --muted: 220 12% 26%;
+    --muted-foreground: 215 14% 68%;
+
+    --accent: 220 12% 30%;
+    --accent-foreground: 210 18% 92%;
+
+    --destructive: 0 65% 56%;
+    --destructive-foreground: 210 18% 92%;
+
+    --border: 220 12% 28%;
+    --input: 220 12% 28%;
+    --ring: 234 75% 70%;
+  }
+
+  /* Dim background with brighter text & borders for higher readability —
+     same low-glare body as .dim, but foreground pushed toward pure white and
+     muted-foreground / border bumped so secondary text and dividers stay
+     distinct. */
+  .contrast {
+    --background: 220 14% 20%;
+    --foreground: 0 0% 98%;
+
+    --card: 220 14% 23%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 220 14% 22%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 234 85% 75%;
+    --primary-foreground: 220 14% 16%;
+
+    --secondary: 220 12% 30%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 220 12% 27%;
+    --muted-foreground: 215 14% 82%;
+
+    --accent: 220 12% 32%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 72% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 220 12% 36%;
+    --input: 220 12% 36%;
+    --ring: 234 85% 75%;
+  }
+
+  /* Warm paper/parchment palette for long reading sessions. */
+  .sepia {
+    --background: 40 45% 94%;
+    --foreground: 25 30% 18%;
+
+    --card: 40 50% 97%;
+    --card-foreground: 25 30% 18%;
+
+    --popover: 40 48% 96%;
+    --popover-foreground: 25 30% 18%;
+
+    --primary: 22 65% 42%;
+    --primary-foreground: 40 50% 97%;
+
+    --secondary: 38 30% 87%;
+    --secondary-foreground: 25 30% 18%;
+
+    --muted: 38 30% 88%;
+    --muted-foreground: 25 20% 42%;
+
+    --accent: 38 30% 84%;
+    --accent-foreground: 25 30% 18%;
+
+    --destructive: 0 65% 45%;
+    --destructive-foreground: 40 50% 97%;
+
+    --border: 35 25% 78%;
+    --input: 35 25% 78%;
+    --ring: 22 65% 42%;
+  }
 }
 
 @layer base {
