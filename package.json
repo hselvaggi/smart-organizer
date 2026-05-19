@@ -10,6 +10,8 @@
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
+    "tauri:build:mac": "tauri build --bundles app,dmg",
+    "tauri:build:mac:universal": "tauri build --target universal-apple-darwin --bundles app,dmg",
     "types": "cd src-tauri && cargo test --lib",
     "test": "vitest run",
     "test:watch": "vitest"
