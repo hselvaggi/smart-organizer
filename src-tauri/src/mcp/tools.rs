@@ -157,7 +157,9 @@ pub async fn call_tool(
                 .await
                 .map(|_| json!({ "ok": true }))
         }
-        _ => unreachable!(),
+        // Registered in TOOLS but missing a dispatch arm — would have been a
+        // runtime panic with the old `unreachable!()`. Fail soft instead.
+        _ => return Err(format!("tool {name} is registered but not wired")),
     };
 
     result.map_err(|e| e.to_string())
