@@ -54,10 +54,15 @@ parts:
       - libxdo3
     override-build: |
       set -eux
-      # Toolchains
+      # Rust toolchain via the rustup snap
       rustup default stable
-      corepack enable
-      corepack prepare pnpm@latest --activate
+
+      # pnpm — install via npm under a writable prefix because the node
+      # snap doesn't expose corepack
+      mkdir -p "$HOME/.npm-global"
+      npm config set prefix "$HOME/.npm-global"
+      export PATH="$HOME/.npm-global/bin:$PATH"
+      npm install -g pnpm@latest
 
       # Build frontend + Tauri binary (no bundling — we install the bare
       # binary into the snap ourselves)
