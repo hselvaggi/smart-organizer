@@ -12,14 +12,18 @@ description: |
 
 grade: stable
 confinement: strict
-license: LicenseRef-PolyForm-Noncommercial-1.0.0
+license: Proprietary
 
 platforms:
   amd64:
 
 apps:
   smart-organizer:
-    command: bin/smart-organizer
+    # The wrapper sets WebKit env vars before exec — the env: block in
+    # snap.yaml silently drops WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS
+    # (the launch chain scrubs anything with "DANGEROUS" in the name),
+    # so we set it from a shell instead. See snap/local/launcher.sh.
+    command: bin/launcher.sh
     extensions:
       - gnome
     plugs:
@@ -49,9 +53,15 @@ parts:
       - wget
     stage-packages:
       - libayatana-appindicator3-1
-      - libwebkit2gtk-4.1-0
-      - librsvg2-2
       - libxdo3
+      # libwebkit2gtk-4.1-0 and librsvg2-2 are intentionally NOT staged:
+      # the gnome-46-2404 platform snap already provides both. Shipping
+      # our own copies causes ABI mismatches — for webkit, the staged
+      # lib and the platform's bind-mounted WebKitWebProcess helper
+      # disagree on ABI and the WebView paints a blank gray window;
+      # for librsvg, the platform's gdk-pixbuf SVG loader fails to find
+      # `rsvg_handle_get_pixbuf_and_error`. Build-time headers come from
+      # the libwebkit2gtk-4.1-dev / librsvg2-dev build-packages.
     override-build: |
       set -eux
       # Rust toolchain via the rustup snap
@@ -62,14 +72,18 @@ parts:
       mkdir -p "$HOME/.npm-global"
       npm config set prefix "$HOME/.npm-global"
       export PATH="$HOME/.npm-global/bin:$PATH"
-      npm install -g pnpm@latest
+      npm install -g pnpm@10
 
       # Build frontend + Tauri binary (no bundling — we install the bare
-      # binary into the snap ourselves)
+      # binary into the snap ourselves). CI=true so pnpm doesn't prompt
+      # for a TTY when purging a stale node_modules from a prior build.
+      export CI=true
       pnpm install --frozen-lockfile
       pnpm tauri build --no-bundle
 
       # Install the binary under the snap's bin/ dir, renamed to match the
-      # snap app name
+      # snap app name, plus the wrapper script the app runs via.
       install -Dm755 src-tauri/target/release/tasks \
         "$CRAFT_PART_INSTALL/bin/smart-organizer"
+      install -Dm755 "$CRAFT_PROJECT_DIR/snap/local/launcher.sh" \
+        "$CRAFT_PART_INSTALL/bin/launcher.sh"
