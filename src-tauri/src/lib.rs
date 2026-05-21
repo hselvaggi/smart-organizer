@@ -36,6 +36,24 @@ pub fn run() {
         }
     }
 
+    // Inside the Snap, force the GLib program name to match the
+    // .desktop file's StartupWMClass so GNOME's dock can associate our
+    // Wayland surface with the .desktop entry — otherwise GDK falls
+    // back to the Cargo binary name and the dock shows a generic cog.
+    // Gated on the SNAP env var so non-snap builds (deb, AppImage, dev)
+    // keep whatever name Tauri/Tao derives from productName.
+    #[cfg(target_os = "linux")]
+    if std::env::var_os("SNAP").is_some() {
+        use std::ffi::CString;
+        use std::os::raw::c_char;
+        extern "C" {
+            fn g_set_prgname(name: *const c_char);
+        }
+        if let Ok(name) = CString::new("smart-organizer") {
+            unsafe { g_set_prgname(name.as_ptr()) };
+        }
+    }
+
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
