@@ -17,6 +17,7 @@ import { TaskComments } from "@/components/task/task-comments";
 import { TaskSubtasks } from "@/components/task/task-subtasks";
 import { nextStatus } from "@/components/task/task-status";
 import { Timeline } from "@/components/timeline";
+import { useConfirmDelete } from "@/lib/confirm";
 import { useProject } from "@/lib/queries/projects";
 import { useStory } from "@/lib/queries/stories";
 import {
@@ -54,6 +55,7 @@ function TaskDetail() {
   const isCreating = taskId === "new";
   const isCreatingSubtask = isCreating && !!parentTaskIdFromSearch;
   const navigate = useNavigate();
+  const confirmDelete = useConfirmDelete();
 
   const { data: project } = useProject(projectId);
   const { data: story } = useStory(storyId);
@@ -165,6 +167,9 @@ function TaskDetail() {
 
   const handleDelete = async () => {
     if (!task) return;
+    // The current task may itself be a subtask — pick the appropriate copy.
+    const kind = task.parentTaskId ? "subtask" : "task";
+    if (!(await confirmDelete(kind))) return;
     await remove.mutateAsync(task.id);
     navigate({
       to: "/projects/$projectId/stories/$storyId",
@@ -257,7 +262,9 @@ function TaskDetail() {
             onToggle={(t) =>
               update.mutate({ id: t.id, status: nextStatus(t.status) })
             }
-            onDelete={(id) => remove.mutate(id)}
+            onDelete={async (id) => {
+              if (await confirmDelete("subtask")) remove.mutate(id);
+            }}
           />
         )}
 

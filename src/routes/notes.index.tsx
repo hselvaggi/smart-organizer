@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ChevronRight, NotebookPen, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useConfirmDelete } from "@/lib/confirm";
 import {
   useDeleteNote,
   useNotes,
@@ -17,6 +18,7 @@ function NotesIndex() {
   const navigate = useNavigate();
   const { data: notes, isLoading } = useNotes();
   const remove = useDeleteNote();
+  const confirmDelete = useConfirmDelete();
 
   const handleAdd = () => {
     navigate({ to: "/notes/$noteId", params: { noteId: "new" } });
@@ -55,7 +57,9 @@ function NotesIndex() {
                   params: { noteId: n.id },
                 })
               }
-              onDelete={() => remove.mutate(n.id)}
+              onDelete={async () => {
+                if (await confirmDelete("note")) remove.mutate(n.id);
+              }}
             />
           ))}
         </ul>

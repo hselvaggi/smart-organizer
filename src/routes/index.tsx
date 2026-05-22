@@ -8,6 +8,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useConfirmDelete } from "@/lib/confirm";
 import {
   useDeleteProject,
   useProjects,
@@ -23,6 +24,7 @@ function ProjectsIndex() {
   const { data: projects, isLoading } = useProjects();
   const remove = useDeleteProject();
   const navigate = useNavigate();
+  const confirmDelete = useConfirmDelete();
 
   const handleAdd = () => {
     navigate({
@@ -64,7 +66,9 @@ function ProjectsIndex() {
                   params: { projectId: p.id },
                 })
               }
-              onDelete={() => remove.mutate(p.id)}
+              onDelete={async () => {
+                if (await confirmDelete("project")) remove.mutate(p.id);
+              }}
             />
           ))}
         </ul>

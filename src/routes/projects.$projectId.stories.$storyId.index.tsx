@@ -21,6 +21,7 @@ import { Breadcrumb, type BreadcrumbItem } from "@/components/breadcrumb";
 import { ListSection } from "@/components/list-section";
 import { RichTextField } from "@/components/rich-text-field";
 import { StatusIcon, nextStatus } from "@/components/task/task-status";
+import { useConfirmDelete } from "@/lib/confirm";
 import { Timeline } from "@/components/timeline";
 import { cn } from "@/lib/cn";
 import {
@@ -62,6 +63,7 @@ function StoryDetail() {
   const isCreating = storyId === "new";
   const navigate = useNavigate();
   const [yellowDays] = useYellowDays();
+  const confirmDelete = useConfirmDelete();
 
   const { data: project } = useProject(projectId);
   const { data: story } = useStory(isCreating ? "" : storyId);
@@ -140,6 +142,7 @@ function StoryDetail() {
 
   const handleDelete = async () => {
     if (!story) return;
+    if (!(await confirmDelete("story"))) return;
     await removeStory.mutateAsync(story.id);
     navigate({ to: "/projects/$projectId", params: { projectId } });
   };
@@ -279,7 +282,9 @@ function StoryDetail() {
                   size="icon"
                   variant="ghost"
                   className="opacity-0 transition-opacity group-hover:opacity-100"
-                  onClick={() => removeTask.mutate(task.id)}
+                  onClick={async () => {
+                    if (await confirmDelete("task")) removeTask.mutate(task.id);
+                  }}
                   aria-label={t("stories.deleteTaskAria")}
                 >
                   <Trash2 />

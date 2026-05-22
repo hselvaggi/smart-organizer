@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SplitEditor } from "@/components/editor/split-editor";
+import { useConfirmDelete } from "@/lib/confirm";
 import {
   useComments,
   useCreateComment,
@@ -16,6 +17,7 @@ export function TaskComments({ taskId }: { taskId: string }) {
   const { data: comments } = useComments(taskId);
   const create = useCreateComment(taskId);
   const remove = useDeleteComment(taskId);
+  const confirmDelete = useConfirmDelete();
 
   const [body, setBody] = useState("");
   const [format, setFormat] = useState<TextFormat>("plaintext");
@@ -46,7 +48,9 @@ export function TaskComments({ taskId }: { taskId: string }) {
             <CommentRow
               key={c.id}
               comment={c}
-              onDelete={() => remove.mutate(c.id)}
+              onDelete={async () => {
+                if (await confirmDelete("comment")) remove.mutate(c.id);
+              }}
             />
           ))}
         </ul>

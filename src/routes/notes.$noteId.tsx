@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Breadcrumb, type BreadcrumbItem } from "@/components/breadcrumb";
 import { RichTextField } from "@/components/rich-text-field";
+import { useConfirmDelete } from "@/lib/confirm";
 import {
   useCreateNote,
   useDeleteNote,
@@ -31,6 +32,7 @@ function NoteDetail() {
   const { projectId: projectIdFromSearch } = Route.useSearch();
   const isCreating = noteId === "new";
   const navigate = useNavigate();
+  const confirmDelete = useConfirmDelete();
 
   const { data: note } = useNote(isCreating ? "" : noteId);
   // Project context for breadcrumb: either the loaded note's projectId (edit)
@@ -109,6 +111,7 @@ function NoteDetail() {
 
   const handleDelete = async () => {
     if (!note) return;
+    if (!(await confirmDelete("note"))) return;
     await remove.mutateAsync(note.id);
     if (note.projectId) {
       navigate({

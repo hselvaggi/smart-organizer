@@ -9,6 +9,7 @@ import {
   Search,
   Settings2,
 } from "lucide-react";
+import { ConfirmDialogHost } from "@/components/confirm-dialog";
 import { ResizeHandles } from "@/components/resize-handles";
 import { TitleBar } from "@/components/title-bar";
 import { CommandPalette } from "@/components/search/command-palette";
@@ -44,6 +45,7 @@ function RootLayout() {
       <ResizeHandles />
       <TitleBar />
       <CommandPalette />
+      <ConfirmDialogHost />
       <div
         className="grid min-h-0 flex-1 transition-[grid-template-columns] duration-200 ease-out"
         style={{

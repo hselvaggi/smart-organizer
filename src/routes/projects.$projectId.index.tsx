@@ -17,6 +17,7 @@ import { ListSection } from "@/components/list-section";
 import { RichTextField } from "@/components/rich-text-field";
 import { StatusIcon, nextStatus } from "@/components/task/task-status";
 import { cn } from "@/lib/cn";
+import { useConfirmDelete } from "@/lib/confirm";
 import {
   DEADLINE_BORDER,
   getDeadlineStatus,
@@ -49,6 +50,7 @@ function ProjectDetail() {
   const isCreating = projectId === "new";
   const navigate = useNavigate();
   const [yellowDays] = useYellowDays();
+  const confirmDelete = useConfirmDelete();
 
   // In create mode we don't fetch anything — the entity doesn't exist yet.
   // `enabled: !!id` in the query hooks treats "" as a no-op.
@@ -116,6 +118,7 @@ function ProjectDetail() {
 
   const handleDelete = async () => {
     if (!project) return;
+    if (!(await confirmDelete("project"))) return;
     await removeProject.mutateAsync(project.id);
     navigate({ to: "/" });
   };
@@ -250,7 +253,9 @@ function ProjectDetail() {
                   size="icon"
                   variant="ghost"
                   className="opacity-0 transition-opacity group-hover:opacity-100"
-                  onClick={() => removeNote.mutate(n.id)}
+                  onClick={async () => {
+                    if (await confirmDelete("note")) removeNote.mutate(n.id);
+                  }}
                   aria-label={t("projects.deleteNoteAria")}
                 >
                   <Trash2 />
@@ -316,7 +321,9 @@ function ProjectDetail() {
                 size="icon"
                 variant="ghost"
                 className="opacity-0 transition-opacity group-hover:opacity-100"
-                onClick={() => removeStory.mutate(s.id)}
+                onClick={async () => {
+                  if (await confirmDelete("story")) removeStory.mutate(s.id);
+                }}
                 aria-label={t("projects.deleteStoryAria")}
               >
                 <Trash2 />

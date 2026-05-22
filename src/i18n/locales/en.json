@@ -148,6 +148,35 @@
     "typeTask": "Task",
     "typeSubtask": "Subtask"
   },
+  "confirm": {
+    "delete": {
+      "confirm": "Delete",
+      "project": {
+        "title": "Delete this project?",
+        "message": "Everything inside it — stories, tasks, subtasks, comments and attached notes — will be deleted too. This cannot be undone."
+      },
+      "story": {
+        "title": "Delete this story?",
+        "message": "All tasks and subtasks under this story, including their comments, will be deleted too. This cannot be undone."
+      },
+      "task": {
+        "title": "Delete this task?",
+        "message": "Any subtasks below it and their comments will be deleted too. This cannot be undone."
+      },
+      "subtask": {
+        "title": "Delete this subtask?",
+        "message": "Any nested subtasks and their comments will be deleted too. This cannot be undone."
+      },
+      "note": {
+        "title": "Delete this note?",
+        "message": "This cannot be undone."
+      },
+      "comment": {
+        "title": "Delete this comment?",
+        "message": "This cannot be undone."
+      }
+    }
+  },
   "settings": {
     "heading": "Settings",
     "subtitle": "Device identity, paired peers and preferences will live here.",

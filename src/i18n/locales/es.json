@@ -148,6 +148,35 @@
     "typeTask": "Tarea",
     "typeSubtask": "Subtarea"
   },
+  "confirm": {
+    "delete": {
+      "confirm": "Borrar",
+      "project": {
+        "title": "¿Borrar este proyecto?",
+        "message": "Se va a borrar también todo lo que contiene: stories, tareas, subtareas, comentarios y notas adjuntas. Esta acción no se puede deshacer."
+      },
+      "story": {
+        "title": "¿Borrar esta story?",
+        "message": "Se van a borrar también todas las tareas y subtareas de esta story junto con sus comentarios. Esta acción no se puede deshacer."
+      },
+      "task": {
+        "title": "¿Borrar esta tarea?",
+        "message": "Se van a borrar también las subtareas que tenga y sus comentarios. Esta acción no se puede deshacer."
+      },
+      "subtask": {
+        "title": "¿Borrar esta subtarea?",
+        "message": "Se van a borrar también las subtareas anidadas y sus comentarios. Esta acción no se puede deshacer."
+      },
+      "note": {
+        "title": "¿Borrar esta nota?",
+        "message": "Esta acción no se puede deshacer."
+      },
+      "comment": {
+        "title": "¿Borrar este comentario?",
+        "message": "Esta acción no se puede deshacer."
+      }
+    }
+  },
   "settings": {
     "heading": "Ajustes",
     "subtitle": "Identidad del dispositivo, peers vinculados y preferencias van a vivir acá.",
