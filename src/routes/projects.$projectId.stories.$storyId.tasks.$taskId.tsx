@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { Save, Trash2 } from "lucide-react";
+import { LayoutGrid, Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -212,15 +212,30 @@ function TaskDetail() {
         />
         <div className="flex items-center gap-2">
           {!isCreating && (
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={handleDelete}
-              aria-label={t("tasks.deleteAria")}
-            >
-              <Trash2 />
-              {t("common.delete")}
-            </Button>
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  navigate({
+                    to: "/projects/$projectId/board",
+                    params: { projectId },
+                  })
+                }
+              >
+                <LayoutGrid />
+                {t("projects.boardButton")}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleDelete}
+                aria-label={t("tasks.deleteAria")}
+              >
+                <Trash2 />
+                {t("common.delete")}
+              </Button>
+            </>
           )}
           <Button type="button" onClick={handleSubmit} disabled={!canSubmit}>
             <Save />

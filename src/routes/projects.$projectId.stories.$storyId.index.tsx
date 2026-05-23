@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import {
   ChevronRight,
   FileText,
+  LayoutGrid,
   ListTree,
   Save,
   Trash2,
@@ -180,15 +181,30 @@ function StoryDetail() {
         />
         <div className="flex items-center gap-2">
           {!isCreating && (
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={handleDelete}
-              aria-label={t("stories.deleteAria")}
-            >
-              <Trash2 />
-              {t("common.delete")}
-            </Button>
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  navigate({
+                    to: "/projects/$projectId/board",
+                    params: { projectId },
+                  })
+                }
+              >
+                <LayoutGrid />
+                {t("projects.boardButton")}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleDelete}
+                aria-label={t("stories.deleteAria")}
+              >
+                <Trash2 />
+                {t("common.delete")}
+              </Button>
+            </>
           )}
           <Button type="button" onClick={handleSubmit} disabled={!canSubmit}>
             <Save />
