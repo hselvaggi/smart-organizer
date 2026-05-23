@@ -13,7 +13,11 @@ use tokio::net::TcpListener;
 use tokio::sync::Mutex;
 use tower_http::cors::CorsLayer;
 
+use serde::{Deserialize, Serialize};
+use tauri::{AppHandle, Emitter};
+
 use crate::mcp::discovery::{self, PeerDiscovery};
+use crate::mcp::pairing::{PairingStatus, PendingPairings};
 use crate::mcp::tools;
 use crate::state::{McpMode, McpState};
 
@@ -28,6 +32,16 @@ struct AppCtx {
     mode: McpMode,
 }
 
+#[derive(Clone)]
+struct PairCtx {
+    pairings: Arc<PendingPairings>,
+    app: AppHandle,
+    /// Server token — returned to the requester once the user accepts so
+    /// they can authenticate future /mcp calls without ever seeing the
+    /// secret on screen.
+    token: String,
+}
+
 pub async fn start(
     state: Arc<Mutex<McpState>>,
     pool: SqlitePool,
@@ -36,6 +50,8 @@ pub async fn start(
     expose_lan: bool,
     token: String,
     discovery: Arc<PeerDiscovery>,
+    pairings: Arc<PendingPairings>,
+    app_handle: AppHandle,
 ) -> Result<(), String> {
     stop(state.clone(), discovery.clone()).await;
     if !mode.is_running() {
@@ -48,8 +64,15 @@ pub async fn start(
     }
 
     let ctx = AppCtx { pool, mode };
+    let pair_ctx = PairCtx {
+        pairings,
+        app: app_handle,
+        token: token.clone(),
+    };
 
-    // /mcp gets optional auth; / stays public so peers can probe identity.
+    // /mcp gets optional auth; /, /pair/* stay public so peers can probe
+    // identity and initiate pairing (pairing is exactly how you get the
+    // bearer token, so it can't require one itself).
     let mcp_route = Router::new()
         .route("/mcp", post(handle_mcp).get(handle_get))
         .with_state(ctx);
@@ -63,9 +86,15 @@ pub async fn start(
         mcp_route
     };
 
+    let pair_router = Router::new()
+        .route("/pair/initiate", post(pair_initiate))
+        .route("/pair/status", post(pair_status))
+        .with_state(pair_ctx);
+
     let app = Router::new()
         .route("/", get(root))
         .merge(mcp_route)
+        .merge(pair_router)
         .layer(CorsLayer::permissive());
 
     let bind_host = if expose_lan { "0.0.0.0" } else { "127.0.0.1" };
@@ -231,4 +260,72 @@ async fn handle_mcp(State(ctx): State<AppCtx>, Json(req): Json<Value>) -> Respon
         }),
     };
     Json(body).into_response()
+}
+
+#[derive(Deserialize)]
+struct InitiateBody {
+    /// Free-form label (hostname etc.) so the user on this side knows who's
+    /// asking when the accept modal pops up.
+    #[serde(default)]
+    requester: String,
+}
+
+#[derive(Serialize)]
+struct InitiateResponse {
+    session_id: String,
+    code: String,
+}
+
+async fn pair_initiate(
+    State(ctx): State<PairCtx>,
+    Json(body): Json<InitiateBody>,
+) -> Response {
+    let label = if body.requester.trim().is_empty() {
+        "Unknown device".to_string()
+    } else {
+        body.requester.trim().to_string()
+    };
+    let session = ctx.pairings.initiate(&label);
+    // Tell the local UI a pairing modal should pop up. Failure to emit is
+    // logged but not fatal — the session still exists, so even if the event
+    // is lost the user can find it via list_pending_pairings.
+    if let Err(e) = ctx.app.emit("pairing-requested", &session) {
+        tracing::warn!(error = %e, "could not emit pairing-requested event");
+    }
+    Json(InitiateResponse {
+        session_id: session.session_id,
+        code: session.code,
+    })
+    .into_response()
+}
+
+#[derive(Deserialize)]
+struct StatusBody {
+    session_id: String,
+}
+
+#[derive(Serialize)]
+struct StatusResponse {
+    status: PairingStatus,
+    /// Only populated when status is Accepted — this is the bearer token
+    /// the requester now uses for /mcp calls.
+    token: Option<String>,
+}
+
+async fn pair_status(
+    State(ctx): State<PairCtx>,
+    Json(body): Json<StatusBody>,
+) -> Response {
+    let Some(status) = ctx.pairings.status(&body.session_id) else {
+        return (
+            StatusCode::NOT_FOUND,
+            Json(StatusResponse {
+                status: PairingStatus::Expired,
+                token: None,
+            }),
+        )
+            .into_response();
+    };
+    let token = matches!(status, PairingStatus::Accepted).then(|| ctx.token.clone());
+    Json(StatusResponse { status, token }).into_response()
 }

@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Download, RefreshCw, Wifi } from "lucide-react";
+import { Download, KeyRound, RefreshCw, Wifi } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PairingInitiator } from "@/components/pairing/pairing-initiator";
 import { api } from "@/lib/tauri";
 import type { Peer, SyncSummary } from "@/types/generated";
 
@@ -44,6 +45,13 @@ export function SyncSection() {
   const trimmedUrl = url.trim();
   const trimmedToken = token.trim();
   const canPull = trimmedUrl.length > 0 && !pull.isPending;
+  const [pairingUrl, setPairingUrl] = useState<string | null>(null);
+
+  const handlePaired = (newToken: string) => {
+    setToken(newToken);
+    localStorage.setItem(LAST_TOKEN_KEY, newToken);
+    setPairingUrl(null);
+  };
 
   const handlePull = () => {
     if (!canPull) return;
@@ -64,7 +72,14 @@ export function SyncSection() {
         {t("settings.sync.description")}
       </p>
 
-      <DiscoveredPeers peers={peers} onPick={(p) => setUrl(p.url)} />
+      <DiscoveredPeers
+        peers={peers}
+        onPick={(p) => setUrl(p.url)}
+        onPair={(p) => {
+          setUrl(p.url);
+          setPairingUrl(p.url);
+        }}
+      />
 
       <div className="flex flex-col gap-2">
         <label className="flex flex-col gap-1">
@@ -94,13 +109,32 @@ export function SyncSection() {
             className="font-mono"
           />
         </label>
-        <div>
+        <div className="flex flex-wrap items-center gap-2">
           <Button type="button" onClick={handlePull} disabled={!canPull}>
             <Download />
             {t(pull.isPending ? "settings.sync.pulling" : "settings.sync.pull")}
           </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setPairingUrl(trimmedUrl)}
+            disabled={trimmedUrl.length === 0}
+            title={t("settings.sync.pairHint")}
+          >
+            <KeyRound />
+            {t("settings.sync.pair")}
+          </Button>
         </div>
       </div>
+
+      {pairingUrl !== null && (
+        <PairingInitiator
+          url={pairingUrl}
+          open
+          onClose={() => setPairingUrl(null)}
+          onPaired={handlePaired}
+        />
+      )}
 
       {pull.isError && (
         <p className="rounded-md border border-destructive/40 bg-destructive/10 p-2 text-xs text-destructive">
@@ -172,9 +206,11 @@ function SummaryReport({ summary }: { summary: SyncSummary }) {
 function DiscoveredPeers({
   peers,
   onPick,
+  onPair,
 }: {
   peers: Peer[];
   onPick: (p: Peer) => void;
+  onPair: (p: Peer) => void;
 }) {
   const { t } = useTranslation();
   return (
@@ -190,11 +226,15 @@ function DiscoveredPeers({
       ) : (
         <ul className="flex flex-col gap-1">
           {peers.map((p) => (
-            <li key={p.name}>
+            <li
+              key={p.name}
+              className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-xs"
+            >
               <button
                 type="button"
                 onClick={() => onPick(p)}
-                className="flex w-full items-center justify-between gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-left text-xs transition-colors hover:border-primary/40"
+                className="flex flex-1 items-center justify-between gap-2 text-left transition-colors hover:text-primary"
+                title={t("settings.sync.pickHint")}
               >
                 <span className="flex items-center gap-2">
                   <Wifi size={12} className="text-muted-foreground" />
@@ -202,6 +242,16 @@ function DiscoveredPeers({
                 </span>
                 <span className="font-mono text-muted-foreground">{p.url}</span>
               </button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => onPair(p)}
+                title={t("settings.sync.pairHint")}
+              >
+                <KeyRound />
+                {t("settings.sync.pair")}
+              </Button>
             </li>
           ))}
         </ul>

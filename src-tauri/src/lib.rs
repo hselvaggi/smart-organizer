@@ -91,6 +91,7 @@ pub fn run() {
                         mcp::PeerDiscovery::new().expect("peer discovery")
                     }
                 };
+                let pairings = Arc::new(mcp::PendingPairings::default());
                 let saved = mcp::load_config(&data_dir);
                 if saved.mode.is_running() {
                     if let Err(e) = mcp::start(
@@ -101,6 +102,8 @@ pub fn run() {
                         saved.expose_lan,
                         saved.token.clone(),
                         discovery.clone(),
+                        pairings.clone(),
+                        handle.clone(),
                     )
                     .await
                     {
@@ -120,6 +123,7 @@ pub fn run() {
                     db: pool,
                     mcp: mcp_state,
                     discovery,
+                    pairings,
                 });
                 Ok::<_, error::AppError>(())
             })?;
@@ -221,6 +225,11 @@ pub fn run() {
             commands::system::regenerate_mcp_token,
             commands::sync::sync_from_peer,
             commands::sync::list_discovered_peers,
+            commands::pairing::start_pairing,
+            commands::pairing::poll_pairing,
+            commands::pairing::list_pending_pairings,
+            commands::pairing::accept_pairing,
+            commands::pairing::reject_pairing,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

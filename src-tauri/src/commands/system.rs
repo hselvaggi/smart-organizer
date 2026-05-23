@@ -73,7 +73,7 @@ pub async fn set_mcp_mode(
     let mut config = mcp::load_config(&data_dir);
     config.mode = mode;
     mcp::save_config(&data_dir, &config).map_err(AppError::Io)?;
-    restart_with(&state, &config).await?;
+    restart_with(&state, &app, &config).await?;
     let guard = state.mcp.lock().await;
     Ok(build_status(&guard))
 }
@@ -95,7 +95,7 @@ pub async fn set_mcp_expose_lan(
         config.token = mcp::generate_token();
     }
     mcp::save_config(&data_dir, &config).map_err(AppError::Io)?;
-    restart_with(&state, &config).await?;
+    restart_with(&state, &app, &config).await?;
     let guard = state.mcp.lock().await;
     Ok(build_status(&guard))
 }
@@ -110,7 +110,7 @@ pub async fn regenerate_mcp_token(
     let mut config = mcp::load_config(&data_dir);
     config.token = mcp::generate_token();
     mcp::save_config(&data_dir, &config).map_err(AppError::Io)?;
-    restart_with(&state, &config).await?;
+    restart_with(&state, &app, &config).await?;
     let guard = state.mcp.lock().await;
     Ok(build_status(&guard))
 }
@@ -142,7 +142,11 @@ pub async fn reset_database(state: State<'_, AppState>) -> AppResult<()> {
     Ok(())
 }
 
-async fn restart_with(state: &State<'_, AppState>, config: &mcp::McpConfig) -> AppResult<()> {
+async fn restart_with(
+    state: &State<'_, AppState>,
+    app: &tauri::AppHandle,
+    config: &mcp::McpConfig,
+) -> AppResult<()> {
     mcp::start(
         state.mcp.clone(),
         state.db.clone(),
@@ -151,6 +155,8 @@ async fn restart_with(state: &State<'_, AppState>, config: &mcp::McpConfig) -> A
         config.expose_lan,
         config.token.clone(),
         state.discovery.clone(),
+        state.pairings.clone(),
+        app.clone(),
     )
     .await
     .map_err(AppError::Config)

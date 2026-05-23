@@ -232,6 +232,9 @@
       "description": "Traé proyectos, stories, tareas, comentarios y notas desde otra instancia de Smart-Organizer que tenga MCP activo. Solo se importan entidades cuyo id no existe localmente — tus ediciones y borrados locales nunca son sobrescritos.",
       "discoveredLabel": "Descubiertos en la red",
       "discoveredEmpty": "Aún no hay peers. Verificá que la otra instancia tenga MCP activo y \"Exponer en la red local\" prendido.",
+      "pickHint": "Clic para autocompletar el campo URL de abajo",
+      "pair": "Vincular",
+      "pairHint": "Vinculá con este peer para intercambiar el token automáticamente",
       "urlLabel": "URL del peer",
       "urlPlaceholder": "http://192.168.1.50:3737",
       "tokenLabel": "Token Bearer (solo si el peer está expuesto a la LAN)",
@@ -281,5 +284,26 @@
     "labelStack": "Stack",
     "labelLicense": "Licencia",
     "licenseDescription": "PolyForm Noncommercial 1.0.0 — libre para uso personal / no comercial. El uso comercial requiere licencia separada; contactá a"
+  },
+  "pairing": {
+    "initiator": {
+      "title": "Vincular con peer",
+      "starting": "Pidiendo al peer que inicie la sesión de vinculación…",
+      "verifyCode": "Verificá que el otro dispositivo muestre el mismo código. Si coincide, aceptá la vinculación allí.",
+      "codeAria": "Código de vinculación",
+      "waiting": "Esperando a que el otro lado acepte…",
+      "rejected": "El otro lado rechazó la vinculación.",
+      "expired": "La vinculación expiró. Probá de nuevo.",
+      "error": "Falló la vinculación"
+    },
+    "acceptor": {
+      "title": "Solicitud de vinculación",
+      "subtitle": "{{device}} quiere vincularse con esta instancia.",
+      "codeLabel": "Código de verificación",
+      "codeAria": "Código de verificación",
+      "verifyHint": "Aceptá solo si coincide con el código que se ve en el otro dispositivo.",
+      "accept": "Aceptar",
+      "reject": "Rechazar"
+    }
   }
 }

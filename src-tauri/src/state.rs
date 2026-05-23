@@ -9,6 +9,7 @@ pub struct AppState {
     pub db: SqlitePool,
     pub mcp: Arc<Mutex<McpState>>,
     pub discovery: Arc<crate::mcp::PeerDiscovery>,
+    pub pairings: Arc<crate::mcp::PendingPairings>,
 }
 
 #[derive(Default)]

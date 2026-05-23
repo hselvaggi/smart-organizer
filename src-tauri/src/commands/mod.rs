@@ -1,5 +1,6 @@
 pub mod comments;
 pub mod notes;
+pub mod pairing;
 pub mod projects;
 pub mod search;
 pub mod stories;

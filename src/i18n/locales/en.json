@@ -232,6 +232,9 @@
       "description": "Pull projects, stories, tasks, comments and notes from another Smart-Organizer instance that has MCP enabled. Only entities whose id doesn't already exist locally are imported — your local edits and deletions are never overwritten.",
       "discoveredLabel": "Discovered on the network",
       "discoveredEmpty": "No peers found yet. Make sure the other instance has MCP on and \"Expose to local network\" enabled.",
+      "pickHint": "Click to fill the URL field below",
+      "pair": "Pair",
+      "pairHint": "Pair with this peer to exchange the bearer token automatically",
       "urlLabel": "Peer URL",
       "urlPlaceholder": "http://192.168.1.50:3737",
       "tokenLabel": "Bearer token (only if the peer exposes to LAN)",
@@ -281,5 +284,26 @@
     "labelStack": "Stack",
     "labelLicense": "License",
     "licenseDescription": "PolyForm Noncommercial 1.0.0 — free for personal / noncommercial use. Commercial use requires a separate license; contact"
+  },
+  "pairing": {
+    "initiator": {
+      "title": "Pair with peer",
+      "starting": "Asking peer to start a pairing session…",
+      "verifyCode": "Check that the other device shows the same code. If it does, accept the pairing on that device.",
+      "codeAria": "Pairing code",
+      "waiting": "Waiting for the other side to accept…",
+      "rejected": "The other side rejected the pairing.",
+      "expired": "Pairing timed out. Try again.",
+      "error": "Pairing failed"
+    },
+    "acceptor": {
+      "title": "Pairing request",
+      "subtitle": "{{device}} wants to pair with this instance.",
+      "codeLabel": "Verification code",
+      "codeAria": "Verification code",
+      "verifyHint": "Only accept if this matches the code shown on the other device.",
+      "accept": "Accept",
+      "reject": "Reject"
+    }
   }
 }

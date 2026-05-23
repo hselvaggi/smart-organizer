@@ -9,6 +9,9 @@ import type {
   NewStory,
   NewTask,
   Note,
+  PairingInit,
+  PairingPoll,
+  PairingSession,
   Peer,
   Project,
   ProjectBoard,
@@ -94,5 +97,16 @@ export const api = {
         token: token && token.length > 0 ? token : null,
       }),
     listPeers: () => invoke<Peer[]>("list_discovered_peers"),
+  },
+
+  pairing: {
+    start: (url: string) => invoke<PairingInit>("start_pairing", { url }),
+    poll: (url: string, sessionId: string) =>
+      invoke<PairingPoll>("poll_pairing", { url, sessionId }),
+    listPending: () => invoke<PairingSession[]>("list_pending_pairings"),
+    accept: (sessionId: string) =>
+      invoke<boolean>("accept_pairing", { sessionId }),
+    reject: (sessionId: string) =>
+      invoke<boolean>("reject_pairing", { sessionId }),
   },
 };
