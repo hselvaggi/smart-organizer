@@ -1,7 +1,7 @@
 use tauri::State;
 
 use crate::error::AppResult;
-use crate::mcp::{sync_from_peer as run_sync, SyncSummary};
+use crate::mcp::{sync_from_peer as run_sync, Peer, SyncSummary};
 use crate::state::AppState;
 
 #[tauri::command]
@@ -12,4 +12,9 @@ pub async fn sync_from_peer(
 ) -> AppResult<SyncSummary> {
     let url = url.trim().to_string();
     run_sync(&state.db, &url, token).await
+}
+
+#[tauri::command]
+pub async fn list_discovered_peers(state: State<'_, AppState>) -> AppResult<Vec<Peer>> {
+    Ok(state.discovery.current())
 }

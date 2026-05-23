@@ -13,6 +13,7 @@ use tokio::net::TcpListener;
 use tokio::sync::Mutex;
 use tower_http::cors::CorsLayer;
 
+use crate::mcp::discovery::{self, PeerDiscovery};
 use crate::mcp::tools;
 use crate::state::{McpMode, McpState};
 
@@ -34,8 +35,9 @@ pub async fn start(
     port: u16,
     expose_lan: bool,
     token: String,
+    discovery: Arc<PeerDiscovery>,
 ) -> Result<(), String> {
-    stop(state.clone()).await;
+    stop(state.clone(), discovery.clone()).await;
     if !mode.is_running() {
         let mut guard = state.lock().await;
         guard.mode = mode;
@@ -80,24 +82,49 @@ pub async fn start(
         }
     });
 
+    // mDNS announce — only when we're actually reachable from the LAN.
+    let announce_fullname = if expose_lan {
+        let hostname = discovery::device_hostname();
+        // Append the port so two instances on the same machine on different
+        // ports get distinct instance names instead of collide-renaming.
+        let instance = format!("{hostname}-{port}");
+        match discovery::announce(discovery.daemon(), &instance, &hostname, port) {
+            Ok(fullname) => {
+                discovery.hide_self(&fullname);
+                Some(fullname)
+            }
+            Err(e) => {
+                tracing::warn!(error = %e, "mdns announce failed");
+                None
+            }
+        }
+    } else {
+        None
+    };
+
     let mut guard = state.lock().await;
     guard.mode = mode;
     guard.handle = Some(handle);
     guard.port = port;
     guard.expose_lan = expose_lan;
     guard.token = token;
+    guard.announce_fullname = announce_fullname;
     tracing::info!(
         ?addr,
         ?mode,
         expose_lan,
         auth = !guard.token.is_empty(),
+        announcing = guard.announce_fullname.is_some(),
         "mcp server started"
     );
     Ok(())
 }
 
-pub async fn stop(state: Arc<Mutex<McpState>>) {
+pub async fn stop(state: Arc<Mutex<McpState>>, discovery: Arc<PeerDiscovery>) {
     let mut guard = state.lock().await;
+    if let Some(fullname) = guard.announce_fullname.take() {
+        discovery::stop_announce(discovery.daemon(), &fullname);
+    }
     if let Some(handle) = guard.handle.take() {
         handle.abort();
         tracing::info!("mcp server stopped");

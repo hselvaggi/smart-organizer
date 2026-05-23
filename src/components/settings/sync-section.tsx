@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Download, RefreshCw } from "lucide-react";
+import { Download, RefreshCw, Wifi } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/tauri";
-import type { SyncSummary } from "@/types/generated";
+import type { Peer, SyncSummary } from "@/types/generated";
 
 const LAST_URL_KEY = "tasks-sync-last-url";
 const LAST_TOKEN_KEY = "tasks-sync-last-token";
@@ -19,6 +19,13 @@ export function SyncSection() {
   const [token, setToken] = useState(
     () => localStorage.getItem(LAST_TOKEN_KEY) ?? "",
   );
+
+  const { data: peers = [] } = useQuery({
+    queryKey: ["mdns-peers"],
+    queryFn: api.sync.listPeers,
+    refetchInterval: 3000,
+    refetchIntervalInBackground: false,
+  });
 
   const pull = useMutation({
     mutationFn: (args: { url: string; token: string }) =>
@@ -56,6 +63,8 @@ export function SyncSection() {
       <p className="text-xs text-muted-foreground">
         {t("settings.sync.description")}
       </p>
+
+      <DiscoveredPeers peers={peers} onPick={(p) => setUrl(p.url)} />
 
       <div className="flex flex-col gap-2">
         <label className="flex flex-col gap-1">
@@ -157,6 +166,47 @@ function SummaryReport({ summary }: { summary: SyncSummary }) {
         muted
       />
     </ul>
+  );
+}
+
+function DiscoveredPeers({
+  peers,
+  onPick,
+}: {
+  peers: Peer[];
+  onPick: (p: Peer) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+        <Wifi size={12} />
+        {t("settings.sync.discoveredLabel")}
+      </span>
+      {peers.length === 0 ? (
+        <p className="rounded-md border border-dashed border-border p-2 text-center text-xs text-muted-foreground">
+          {t("settings.sync.discoveredEmpty")}
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-1">
+          {peers.map((p) => (
+            <li key={p.name}>
+              <button
+                type="button"
+                onClick={() => onPick(p)}
+                className="flex w-full items-center justify-between gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-left text-xs transition-colors hover:border-primary/40"
+              >
+                <span className="flex items-center gap-2">
+                  <Wifi size={12} className="text-muted-foreground" />
+                  <span className="font-medium">{p.label}</span>
+                </span>
+                <span className="font-mono text-muted-foreground">{p.url}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 

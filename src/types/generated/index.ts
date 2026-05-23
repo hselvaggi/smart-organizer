@@ -8,6 +8,7 @@ export type { NewProject } from "./NewProject";
 export type { NewStory } from "./NewStory";
 export type { NewTask } from "./NewTask";
 export type { Note } from "./Note";
+export type { Peer } from "./Peer";
 export type { Project } from "./Project";
 export type { ProjectBoard } from "./ProjectBoard";
 export type { SearchHit } from "./SearchHit";

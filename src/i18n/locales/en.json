@@ -230,6 +230,8 @@
     "sync": {
       "heading": "Sync from peer",
       "description": "Pull projects, stories, tasks, comments and notes from another Smart-Organizer instance that has MCP enabled. Only entities whose id doesn't already exist locally are imported — your local edits and deletions are never overwritten.",
+      "discoveredLabel": "Discovered on the network",
+      "discoveredEmpty": "No peers found yet. Make sure the other instance has MCP on and \"Expose to local network\" enabled.",
       "urlLabel": "Peer URL",
       "urlPlaceholder": "http://192.168.1.50:3737",
       "tokenLabel": "Bearer token (only if the peer exposes to LAN)",

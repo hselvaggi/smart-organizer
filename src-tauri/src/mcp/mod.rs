@@ -1,10 +1,12 @@
 pub mod client;
+pub mod discovery;
 pub mod server;
 pub mod tools;
 
 use std::path::Path;
 
 pub use client::{sync_from_peer, SyncSummary};
+pub use discovery::{Peer, PeerDiscovery};
 pub use server::{start, DEFAULT_PORT};
 
 use crate::state::McpMode;

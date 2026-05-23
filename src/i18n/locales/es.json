@@ -230,6 +230,8 @@
     "sync": {
       "heading": "Sincronizar desde otro peer",
       "description": "Traé proyectos, stories, tareas, comentarios y notas desde otra instancia de Smart-Organizer que tenga MCP activo. Solo se importan entidades cuyo id no existe localmente — tus ediciones y borrados locales nunca son sobrescritos.",
+      "discoveredLabel": "Descubiertos en la red",
+      "discoveredEmpty": "Aún no hay peers. Verificá que la otra instancia tenga MCP activo y \"Exponer en la red local\" prendido.",
       "urlLabel": "URL del peer",
       "urlPlaceholder": "http://192.168.1.50:3737",
       "tokenLabel": "Token Bearer (solo si el peer está expuesto a la LAN)",

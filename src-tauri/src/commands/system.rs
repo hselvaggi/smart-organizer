@@ -150,6 +150,7 @@ async fn restart_with(state: &State<'_, AppState>, config: &mcp::McpConfig) -> A
         config.port,
         config.expose_lan,
         config.token.clone(),
+        state.discovery.clone(),
     )
     .await
     .map_err(AppError::Config)

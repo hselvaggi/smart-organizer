@@ -9,6 +9,7 @@ import type {
   NewStory,
   NewTask,
   Note,
+  Peer,
   Project,
   ProjectBoard,
   SearchHit,
@@ -92,5 +93,6 @@ export const api = {
         url,
         token: token && token.length > 0 ? token : null,
       }),
+    listPeers: () => invoke<Peer[]>("list_discovered_peers"),
   },
 };

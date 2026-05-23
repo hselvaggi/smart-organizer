@@ -8,6 +8,7 @@ use ts_rs::TS;
 pub struct AppState {
     pub db: SqlitePool,
     pub mcp: Arc<Mutex<McpState>>,
+    pub discovery: Arc<crate::mcp::PeerDiscovery>,
 }
 
 #[derive(Default)]
@@ -19,6 +20,9 @@ pub struct McpState {
     /// Bearer token enforced on /mcp when `expose_lan` is true. Empty means
     /// no auth (only valid when bound to 127.0.0.1).
     pub token: String,
+    /// mDNS service fullname we registered, if any. Used to unregister on
+    /// stop/restart so the network doesn't see stale advertisements.
+    pub announce_fullname: Option<String>,
 }
 
 #[derive(

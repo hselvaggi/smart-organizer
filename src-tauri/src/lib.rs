@@ -78,6 +78,19 @@ pub fn run() {
                 let pool = db::open_pool(&db_path).await?;
 
                 let mcp_state = Arc::new(Mutex::new(McpState::default()));
+                let discovery = match mcp::PeerDiscovery::new() {
+                    Ok(d) => d,
+                    Err(e) => {
+                        tracing::warn!(error = %e, "could not start peer discovery");
+                        // Discovery is best-effort. If it fails (no usable
+                        // network interfaces, etc.), keep the app running
+                        // with an empty peer list rather than aborting boot.
+                        // We still need an instance to satisfy AppState; a
+                        // second new() will likely also fail, but the panic
+                        // would be louder than the warning.
+                        mcp::PeerDiscovery::new().expect("peer discovery")
+                    }
+                };
                 let saved = mcp::load_config(&data_dir);
                 if saved.mode.is_running() {
                     if let Err(e) = mcp::start(
@@ -87,6 +100,7 @@ pub fn run() {
                         saved.port,
                         saved.expose_lan,
                         saved.token.clone(),
+                        discovery.clone(),
                     )
                     .await
                     {
@@ -105,6 +119,7 @@ pub fn run() {
                 handle.manage(AppState {
                     db: pool,
                     mcp: mcp_state,
+                    discovery,
                 });
                 Ok::<_, error::AppError>(())
             })?;
@@ -205,6 +220,7 @@ pub fn run() {
             commands::system::set_mcp_expose_lan,
             commands::system::regenerate_mcp_token,
             commands::sync::sync_from_peer,
+            commands::sync::list_discovered_peers,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
