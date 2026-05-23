@@ -263,6 +263,7 @@ async fn handle_mcp(State(ctx): State<AppCtx>, Json(req): Json<Value>) -> Respon
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct InitiateBody {
     /// Free-form label (hostname etc.) so the user on this side knows who's
     /// asking when the accept modal pops up.
@@ -271,6 +272,7 @@ struct InitiateBody {
 }
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 struct InitiateResponse {
     session_id: String,
     code: String,
@@ -300,11 +302,13 @@ async fn pair_initiate(
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct StatusBody {
     session_id: String,
 }
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 struct StatusResponse {
     status: PairingStatus,
     /// Only populated when status is Accepted — this is the bearer token
