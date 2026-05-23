@@ -13,6 +13,7 @@ import type {
   ProjectBoard,
   SearchHit,
   Story,
+  SyncSummary,
   SystemInfo,
   Task,
   UpdateNote,
@@ -80,5 +81,9 @@ export const api = {
   mcp: {
     status: () => invoke<McpStatus>("get_mcp_status"),
     setMode: (mode: McpMode) => invoke<McpStatus>("set_mcp_mode", { mode }),
+  },
+
+  sync: {
+    fromPeer: (url: string) => invoke<SyncSummary>("sync_from_peer", { url }),
   },
 };

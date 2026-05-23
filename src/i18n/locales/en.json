@@ -218,6 +218,21 @@
       "copyEndpoint": "Copy endpoint URL",
       "failed": "Failed to apply"
     },
+    "sync": {
+      "heading": "Sync from peer",
+      "description": "Pull projects, stories, tasks, comments and notes from another Smart-Organizer instance that has MCP enabled. Only entities whose id doesn't already exist locally are imported — your local edits and deletions are never overwritten.",
+      "urlPlaceholder": "http://192.168.1.50:3737",
+      "pull": "Pull",
+      "pulling": "Pulling…",
+      "empty": "Peer has no data to pull.",
+      "upToDate": "Already up to date ({{skipped}} entities skipped).",
+      "projects": "Projects",
+      "stories": "Stories",
+      "tasks": "Tasks",
+      "comments": "Comments",
+      "notes": "Notes",
+      "skipped": "Skipped"
+    },
     "application": {
       "heading": "Application",
       "description": "Closing the window via the X minimises Organizer to the tray. Use this to actually shut it down.",

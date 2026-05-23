@@ -109,6 +109,34 @@ pub async fn update(pool: &SqlitePool, input: UpdateNote) -> AppResult<Note> {
     Ok(note)
 }
 
+/// Insert a note verbatim from a peer. See `projects::insert_raw` for
+/// semantics.
+pub async fn insert_raw(pool: &SqlitePool, n: &Note) -> AppResult<bool> {
+    let res = sqlx::query(
+        "INSERT INTO notes
+            (id, project_id, title, body, body_format, sort_order,
+             created_at, updated_at, deleted_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
+         ON CONFLICT(id) DO NOTHING",
+    )
+    .bind(&n.id)
+    .bind(&n.project_id)
+    .bind(&n.title)
+    .bind(&n.body)
+    .bind(n.body_format)
+    .bind(n.sort_order)
+    .bind(&n.created_at)
+    .bind(&n.updated_at)
+    .bind(&n.deleted_at)
+    .execute(pool)
+    .await?;
+    let inserted = res.rows_affected() > 0;
+    if inserted && n.deleted_at.is_none() {
+        search::index_note(pool, n).await?;
+    }
+    Ok(inserted)
+}
+
 pub async fn soft_delete(pool: &SqlitePool, id: &str) -> AppResult<()> {
     let now = now_iso();
     sqlx::query("UPDATE notes SET deleted_at = ?2, updated_at = ?2 WHERE id = ?1")

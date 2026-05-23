@@ -47,6 +47,31 @@ pub async fn create(pool: &SqlitePool, input: NewComment) -> AppResult<Comment> 
     Ok(comment)
 }
 
+/// Insert a comment verbatim from a peer. See `projects::insert_raw` for
+/// semantics.
+pub async fn insert_raw(pool: &SqlitePool, c: &Comment) -> AppResult<bool> {
+    let res = sqlx::query(
+        "INSERT INTO comments
+            (id, task_id, body, body_format, created_at, updated_at, deleted_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+         ON CONFLICT(id) DO NOTHING",
+    )
+    .bind(&c.id)
+    .bind(&c.task_id)
+    .bind(&c.body)
+    .bind(c.body_format)
+    .bind(&c.created_at)
+    .bind(&c.updated_at)
+    .bind(&c.deleted_at)
+    .execute(pool)
+    .await?;
+    let inserted = res.rows_affected() > 0;
+    if inserted && c.deleted_at.is_none() {
+        search::index_comment(pool, c).await?;
+    }
+    Ok(inserted)
+}
+
 pub async fn soft_delete(pool: &SqlitePool, id: &str) -> AppResult<()> {
     let now = now_iso();
     sqlx::query("UPDATE comments SET deleted_at = ?2, updated_at = ?2 WHERE id = ?1")

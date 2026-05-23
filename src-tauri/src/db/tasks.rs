@@ -157,6 +157,44 @@ pub async fn update(pool: &SqlitePool, input: UpdateTask) -> AppResult<Task> {
     Ok(task)
 }
 
+/// Insert a task verbatim from a peer. The caller MUST insert parents before
+/// children — `parent_task_id` is a FK to tasks(id) so an unsorted batch can
+/// FK-violate. The peer-sync walker takes care of topological ordering.
+pub async fn insert_raw(pool: &SqlitePool, t: &Task) -> AppResult<bool> {
+    let res = sqlx::query(
+        "INSERT INTO tasks
+            (id, story_id, parent_task_id, title, description, description_format,
+             result, result_format, status, sort_order,
+             created_at, updated_at, deleted_at,
+             started_at, completed_at, due_date)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16)
+         ON CONFLICT(id) DO NOTHING",
+    )
+    .bind(&t.id)
+    .bind(&t.story_id)
+    .bind(&t.parent_task_id)
+    .bind(&t.title)
+    .bind(&t.description)
+    .bind(t.description_format)
+    .bind(&t.result)
+    .bind(t.result_format)
+    .bind(t.status)
+    .bind(t.sort_order)
+    .bind(&t.created_at)
+    .bind(&t.updated_at)
+    .bind(&t.deleted_at)
+    .bind(&t.started_at)
+    .bind(&t.completed_at)
+    .bind(&t.due_date)
+    .execute(pool)
+    .await?;
+    let inserted = res.rows_affected() > 0;
+    if inserted && t.deleted_at.is_none() {
+        search::index_task(pool, t).await?;
+    }
+    Ok(inserted)
+}
+
 pub async fn soft_delete(pool: &SqlitePool, id: &str) -> AppResult<()> {
     // Soft-delete cascades by hand. Tasks need WITH RECURSIVE because a subtask
     // tree is linked via parent_task_id (not story_id) for nesting deeper than

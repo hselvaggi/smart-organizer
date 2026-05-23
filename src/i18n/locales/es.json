@@ -218,6 +218,21 @@
       "copyEndpoint": "Copiar URL del endpoint",
       "failed": "No se pudo aplicar"
     },
+    "sync": {
+      "heading": "Sincronizar desde otro peer",
+      "description": "Traé proyectos, stories, tareas, comentarios y notas desde otra instancia de Smart-Organizer que tenga MCP activo. Solo se importan entidades cuyo id no existe localmente — tus ediciones y borrados locales nunca son sobrescritos.",
+      "urlPlaceholder": "http://192.168.1.50:3737",
+      "pull": "Traer",
+      "pulling": "Trayendo…",
+      "empty": "El peer no tiene datos para traer.",
+      "upToDate": "Ya está al día ({{skipped}} entidades omitidas).",
+      "projects": "Proyectos",
+      "stories": "Stories",
+      "tasks": "Tareas",
+      "comments": "Comentarios",
+      "notes": "Notas",
+      "skipped": "Omitidas"
+    },
     "application": {
       "heading": "Aplicación",
       "description": "Cerrar la ventana con la X minimiza Organizer a la bandeja del sistema. Usá esto para cerrarla del todo.",

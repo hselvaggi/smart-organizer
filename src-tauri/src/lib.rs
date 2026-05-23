@@ -192,6 +192,7 @@ pub fn run() {
             commands::system::quit_app,
             commands::system::get_mcp_status,
             commands::system::set_mcp_mode,
+            commands::sync::sync_from_peer,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

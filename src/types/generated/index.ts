@@ -12,6 +12,7 @@ export type { Project } from "./Project";
 export type { ProjectBoard } from "./ProjectBoard";
 export type { SearchHit } from "./SearchHit";
 export type { Story } from "./Story";
+export type { SyncSummary } from "./SyncSummary";
 export type { SystemInfo } from "./SystemInfo";
 export type { Task } from "./Task";
 export type { TaskStatus } from "./TaskStatus";

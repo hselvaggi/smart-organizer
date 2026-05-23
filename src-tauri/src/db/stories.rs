@@ -120,6 +120,39 @@ pub async fn update(pool: &SqlitePool, input: UpdateStory) -> AppResult<Story> {
     Ok(story)
 }
 
+/// Insert a story verbatim from a peer. See `projects::insert_raw` for
+/// semantics.
+pub async fn insert_raw(pool: &SqlitePool, s: &Story) -> AppResult<bool> {
+    let res = sqlx::query(
+        "INSERT INTO stories
+            (id, project_id, title, description, description_format, status,
+             sort_order, created_at, updated_at, deleted_at,
+             started_at, completed_at, due_date)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)
+         ON CONFLICT(id) DO NOTHING",
+    )
+    .bind(&s.id)
+    .bind(&s.project_id)
+    .bind(&s.title)
+    .bind(&s.description)
+    .bind(s.description_format)
+    .bind(s.status)
+    .bind(s.sort_order)
+    .bind(&s.created_at)
+    .bind(&s.updated_at)
+    .bind(&s.deleted_at)
+    .bind(&s.started_at)
+    .bind(&s.completed_at)
+    .bind(&s.due_date)
+    .execute(pool)
+    .await?;
+    let inserted = res.rows_affected() > 0;
+    if inserted && s.deleted_at.is_none() {
+        search::index_story(pool, s).await?;
+    }
+    Ok(inserted)
+}
+
 pub async fn soft_delete(pool: &SqlitePool, id: &str) -> AppResult<()> {
     // Soft-delete cascades by hand because FK ON DELETE CASCADE only fires for
     // hard deletes. See db::projects::soft_delete for the same pattern.

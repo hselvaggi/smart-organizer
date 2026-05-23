@@ -14,6 +14,9 @@ pub enum AppError {
     #[error("io error: {0}")]
     Io(#[from] std::io::Error),
 
+    #[error("sync error: {0}")]
+    Sync(String),
+
     #[error("{0}")]
     Missing(&'static str),
 }

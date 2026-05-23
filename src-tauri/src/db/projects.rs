@@ -97,6 +97,35 @@ pub async fn update(pool: &SqlitePool, input: UpdateProject) -> AppResult<Projec
     Ok(project)
 }
 
+/// Insert a project verbatim (preserving id + timestamps) coming from a peer.
+/// Returns `true` if a new row was inserted, `false` if the id already exists
+/// locally (in which case the local copy — including any local edits or
+/// soft-delete — is preserved).
+pub async fn insert_raw(pool: &SqlitePool, p: &Project) -> AppResult<bool> {
+    let res = sqlx::query(
+        "INSERT INTO projects
+            (id, title, description, description_format, sort_order,
+             created_at, updated_at, deleted_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
+         ON CONFLICT(id) DO NOTHING",
+    )
+    .bind(&p.id)
+    .bind(&p.title)
+    .bind(&p.description)
+    .bind(p.description_format)
+    .bind(p.sort_order)
+    .bind(&p.created_at)
+    .bind(&p.updated_at)
+    .bind(&p.deleted_at)
+    .execute(pool)
+    .await?;
+    let inserted = res.rows_affected() > 0;
+    if inserted && p.deleted_at.is_none() {
+        search::index_project(pool, p).await?;
+    }
+    Ok(inserted)
+}
+
 pub async fn soft_delete(pool: &SqlitePool, id: &str) -> AppResult<()> {
     // Soft-delete cascades by hand because the FK ON DELETE CASCADE only fires
     // for hard deletes. Without this, deleting a project would leave its

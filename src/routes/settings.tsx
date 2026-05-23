@@ -6,6 +6,7 @@ import { DangerZoneSection } from "@/components/settings/danger-zone-section";
 import { DeadlinesSection } from "@/components/settings/deadlines-section";
 import { LanguageSection } from "@/components/settings/language-section";
 import { McpSection } from "@/components/settings/mcp-section";
+import { SyncSection } from "@/components/settings/sync-section";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsPage,
@@ -26,6 +27,7 @@ function SettingsPage() {
       <AppearanceSection />
       <DeadlinesSection />
       <McpSection />
+      <SyncSection />
       <ApplicationSection />
       <DangerZoneSection />
     </div>
