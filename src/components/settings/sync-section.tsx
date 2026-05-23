@@ -8,6 +8,7 @@ import { api } from "@/lib/tauri";
 import type { SyncSummary } from "@/types/generated";
 
 const LAST_URL_KEY = "tasks-sync-last-url";
+const LAST_TOKEN_KEY = "tasks-sync-last-token";
 
 export function SyncSection() {
   const { t } = useTranslation();
@@ -15,9 +16,13 @@ export function SyncSection() {
   const [url, setUrl] = useState(
     () => localStorage.getItem(LAST_URL_KEY) ?? "",
   );
+  const [token, setToken] = useState(
+    () => localStorage.getItem(LAST_TOKEN_KEY) ?? "",
+  );
 
   const pull = useMutation({
-    mutationFn: (peerUrl: string) => api.sync.fromPeer(peerUrl),
+    mutationFn: (args: { url: string; token: string }) =>
+      api.sync.fromPeer(args.url, args.token || undefined),
     onSuccess: () => {
       // Anything could have arrived — invalidate the whole entity cache so
       // the UI rehydrates from disk on next render.
@@ -29,13 +34,15 @@ export function SyncSection() {
     },
   });
 
-  const trimmed = url.trim();
-  const canPull = trimmed.length > 0 && !pull.isPending;
+  const trimmedUrl = url.trim();
+  const trimmedToken = token.trim();
+  const canPull = trimmedUrl.length > 0 && !pull.isPending;
 
   const handlePull = () => {
     if (!canPull) return;
-    localStorage.setItem(LAST_URL_KEY, trimmed);
-    pull.mutate(trimmed);
+    localStorage.setItem(LAST_URL_KEY, trimmedUrl);
+    localStorage.setItem(LAST_TOKEN_KEY, trimmedToken);
+    pull.mutate({ url: trimmedUrl, token: trimmedToken });
   };
 
   return (
@@ -50,20 +57,40 @@ export function SyncSection() {
         {t("settings.sync.description")}
       </p>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <Input
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder={t("settings.sync.urlPlaceholder")}
-          className="flex-1"
-          spellCheck={false}
-          autoCorrect="off"
-          autoCapitalize="off"
-        />
-        <Button type="button" onClick={handlePull} disabled={!canPull}>
-          <Download />
-          {t(pull.isPending ? "settings.sync.pulling" : "settings.sync.pull")}
-        </Button>
+      <div className="flex flex-col gap-2">
+        <label className="flex flex-col gap-1">
+          <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            {t("settings.sync.urlLabel")}
+          </span>
+          <Input
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder={t("settings.sync.urlPlaceholder")}
+            spellCheck={false}
+            autoCorrect="off"
+            autoCapitalize="off"
+          />
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            {t("settings.sync.tokenLabel")}
+          </span>
+          <Input
+            value={token}
+            onChange={(e) => setToken(e.target.value)}
+            placeholder={t("settings.sync.tokenPlaceholder")}
+            spellCheck={false}
+            autoCorrect="off"
+            autoCapitalize="off"
+            className="font-mono"
+          />
+        </label>
+        <div>
+          <Button type="button" onClick={handlePull} disabled={!canPull}>
+            <Download />
+            {t(pull.isPending ? "settings.sync.pulling" : "settings.sync.pull")}
+          </Button>
+        </div>
       </div>
 
       {pull.isError && (

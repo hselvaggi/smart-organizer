@@ -15,6 +15,10 @@ pub struct McpState {
     pub mode: McpMode,
     pub handle: Option<JoinHandle<()>>,
     pub port: u16,
+    pub expose_lan: bool,
+    /// Bearer token enforced on /mcp when `expose_lan` is true. Empty means
+    /// no auth (only valid when bound to 127.0.0.1).
+    pub token: String,
 }
 
 #[derive(

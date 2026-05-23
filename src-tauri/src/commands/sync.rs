@@ -8,7 +8,8 @@ use crate::state::AppState;
 pub async fn sync_from_peer(
     state: State<'_, AppState>,
     url: String,
+    token: Option<String>,
 ) -> AppResult<SyncSummary> {
     let url = url.trim().to_string();
-    run_sync(&state.db, &url).await
+    run_sync(&state.db, &url, token).await
 }

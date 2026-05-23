@@ -81,9 +81,16 @@ export const api = {
   mcp: {
     status: () => invoke<McpStatus>("get_mcp_status"),
     setMode: (mode: McpMode) => invoke<McpStatus>("set_mcp_mode", { mode }),
+    setExposeLan: (expose: boolean) =>
+      invoke<McpStatus>("set_mcp_expose_lan", { expose }),
+    regenerateToken: () => invoke<McpStatus>("regenerate_mcp_token"),
   },
 
   sync: {
-    fromPeer: (url: string) => invoke<SyncSummary>("sync_from_peer", { url }),
+    fromPeer: (url: string, token?: string) =>
+      invoke<SyncSummary>("sync_from_peer", {
+        url,
+        token: token && token.length > 0 ? token : null,
+      }),
   },
 };

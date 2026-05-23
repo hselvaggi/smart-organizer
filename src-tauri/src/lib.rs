@@ -78,18 +78,28 @@ pub fn run() {
                 let pool = db::open_pool(&db_path).await?;
 
                 let mcp_state = Arc::new(Mutex::new(McpState::default()));
-                let saved_mode = mcp::load_mode(&data_dir);
-                if saved_mode.is_running() {
+                let saved = mcp::load_config(&data_dir);
+                if saved.mode.is_running() {
                     if let Err(e) = mcp::start(
                         mcp_state.clone(),
                         pool.clone(),
-                        saved_mode,
-                        mcp::DEFAULT_PORT,
+                        saved.mode,
+                        saved.port,
+                        saved.expose_lan,
+                        saved.token.clone(),
                     )
                     .await
                     {
                         tracing::warn!(error = %e, "could not auto-start mcp");
                     }
+                } else {
+                    // Keep the saved settings visible in state even when the
+                    // server is off, so the UI shows them correctly.
+                    let mut guard = mcp_state.lock().await;
+                    guard.mode = saved.mode;
+                    guard.port = saved.port;
+                    guard.expose_lan = saved.expose_lan;
+                    guard.token = saved.token;
                 }
 
                 handle.manage(AppState {
@@ -192,6 +202,8 @@ pub fn run() {
             commands::system::quit_app,
             commands::system::get_mcp_status,
             commands::system::set_mcp_mode,
+            commands::system::set_mcp_expose_lan,
+            commands::system::regenerate_mcp_token,
             commands::sync::sync_from_peer,
         ])
         .run(tauri::generate_context!())

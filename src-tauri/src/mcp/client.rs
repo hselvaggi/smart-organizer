@@ -39,25 +39,40 @@ pub struct SyncSummary {
     pub skipped: u32,
 }
 
-/// Thin JSON-RPC client over the peer's `/mcp` endpoint.
+/// Thin JSON-RPC client over the peer's `/mcp` endpoint. If a token is set,
+/// it is sent on every request as `Authorization: Bearer <token>`.
 struct PeerClient {
     base_url: String,
+    token: Option<String>,
     http: Client,
     next_id: AtomicU64,
 }
 
 impl PeerClient {
-    fn new(base_url: &str) -> AppResult<Self> {
+    fn new(base_url: &str, token: Option<String>) -> AppResult<Self> {
         let http = Client::builder()
             .timeout(std::time::Duration::from_secs(15))
             .build()
             .map_err(|e| AppError::Sync(format!("init http client: {e}")))?;
         let base_url = base_url.trim_end_matches('/').to_string();
+        let token = token.and_then(|t| {
+            let trimmed = t.trim().to_string();
+            if trimmed.is_empty() { None } else { Some(trimmed) }
+        });
         Ok(Self {
             base_url,
+            token,
             http,
             next_id: AtomicU64::new(1),
         })
+    }
+
+    fn request(&self, url: &str) -> reqwest::RequestBuilder {
+        let mut req = self.http.post(url);
+        if let Some(token) = &self.token {
+            req = req.bearer_auth(token);
+        }
+        req
     }
 
     /// Call an MCP tool and deserialize its content payload into `T`. The MCP
@@ -78,8 +93,7 @@ impl PeerClient {
         let url = format!("{}/mcp", self.base_url);
 
         let resp: Value = self
-            .http
-            .post(&url)
+            .request(&url)
             .json(&body)
             .send()
             .await
@@ -129,8 +143,7 @@ impl PeerClient {
         });
         let url = format!("{}/mcp", self.base_url);
         let resp: Value = self
-            .http
-            .post(&url)
+            .request(&url)
             .json(&body)
             .send()
             .await
@@ -152,8 +165,12 @@ impl PeerClient {
 /// and standalone). Stops on the first transport error; partial progress is
 /// kept (each insert is its own statement, not wrapped in a global tx, so a
 /// network failure halfway through doesn't lose the already-imported rows).
-pub async fn sync_from_peer(pool: &SqlitePool, base_url: &str) -> AppResult<SyncSummary> {
-    let client = PeerClient::new(base_url)?;
+pub async fn sync_from_peer(
+    pool: &SqlitePool,
+    base_url: &str,
+    token: Option<String>,
+) -> AppResult<SyncSummary> {
+    let client = PeerClient::new(base_url, token)?;
     client.handshake().await?;
 
     let mut summary = SyncSummary::default();

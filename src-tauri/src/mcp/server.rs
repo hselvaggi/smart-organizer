@@ -1,8 +1,9 @@
 use std::net::SocketAddr;
 use std::sync::Arc;
 
-use axum::extract::State;
-use axum::http::StatusCode;
+use axum::extract::{Request, State};
+use axum::http::{header, StatusCode};
+use axum::middleware::Next;
 use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
@@ -31,24 +32,42 @@ pub async fn start(
     pool: SqlitePool,
     mode: McpMode,
     port: u16,
+    expose_lan: bool,
+    token: String,
 ) -> Result<(), String> {
     stop(state.clone()).await;
     if !mode.is_running() {
+        let mut guard = state.lock().await;
+        guard.mode = mode;
+        guard.port = port;
+        guard.expose_lan = expose_lan;
+        guard.token = token;
         return Ok(());
     }
 
-    let ctx = AppCtx {
-        pool,
-        mode,
+    let ctx = AppCtx { pool, mode };
+
+    // /mcp gets optional auth; / stays public so peers can probe identity.
+    let mcp_route = Router::new()
+        .route("/mcp", post(handle_mcp).get(handle_get))
+        .with_state(ctx);
+
+    let mcp_route = if expose_lan && !token.is_empty() {
+        mcp_route.layer(axum::middleware::from_fn_with_state(
+            Arc::new(token.clone()),
+            require_bearer,
+        ))
+    } else {
+        mcp_route
     };
 
     let app = Router::new()
-        .route("/mcp", post(handle_mcp).get(handle_get))
         .route("/", get(root))
-        .layer(CorsLayer::permissive())
-        .with_state(ctx);
+        .merge(mcp_route)
+        .layer(CorsLayer::permissive());
 
-    let addr: SocketAddr = format!("127.0.0.1:{port}")
+    let bind_host = if expose_lan { "0.0.0.0" } else { "127.0.0.1" };
+    let addr: SocketAddr = format!("{bind_host}:{port}")
         .parse()
         .map_err(|e: std::net::AddrParseError| e.to_string())?;
     let listener = TcpListener::bind(addr)
@@ -65,7 +84,15 @@ pub async fn start(
     guard.mode = mode;
     guard.handle = Some(handle);
     guard.port = port;
-    tracing::info!(?addr, ?mode, "mcp server started");
+    guard.expose_lan = expose_lan;
+    guard.token = token;
+    tracing::info!(
+        ?addr,
+        ?mode,
+        expose_lan,
+        auth = !guard.token.is_empty(),
+        "mcp server started"
+    );
     Ok(())
 }
 
@@ -76,6 +103,32 @@ pub async fn stop(state: Arc<Mutex<McpState>>) {
         tracing::info!("mcp server stopped");
     }
     guard.mode = McpMode::Off;
+}
+
+/// Bearer-token gate. The token Arc is the expected secret; the middleware
+/// rejects requests that don't present an `Authorization: Bearer <token>`
+/// header matching it.
+async fn require_bearer(
+    State(expected): State<Arc<String>>,
+    req: Request,
+    next: Next,
+) -> Response {
+    let header_value = req
+        .headers()
+        .get(header::AUTHORIZATION)
+        .and_then(|v| v.to_str().ok());
+    let presented = header_value.and_then(|s| s.strip_prefix("Bearer "));
+    if presented != Some(expected.as_str()) {
+        return (
+            StatusCode::UNAUTHORIZED,
+            Json(json!({
+                "jsonrpc": "2.0",
+                "error": { "code": -32001, "message": "unauthorized" }
+            })),
+        )
+            .into_response();
+    }
+    next.run(req).await
 }
 
 async fn root() -> impl IntoResponse {

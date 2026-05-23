@@ -1,11 +1,20 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Bot, Check, Circle, Copy } from "lucide-react";
+import {
+  AlertTriangle,
+  Bot,
+  Check,
+  Circle,
+  Copy,
+  Globe,
+  KeyRound,
+  RefreshCcw,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { api } from "@/lib/tauri";
-import type { McpMode } from "@/types/generated";
+import type { McpMode, McpStatus } from "@/types/generated";
 
 function useModeOptions() {
   const { t } = useTranslation();
@@ -36,20 +45,27 @@ export function McpSection() {
     queryKey: ["mcp-status"],
     queryFn: api.mcp.status,
   });
+  const onSuccess = (data: McpStatus) => qc.setQueryData(["mcp-status"], data);
   const setMode = useMutation({
     mutationFn: (mode: McpMode) => api.mcp.setMode(mode),
-    onSuccess: (data) => {
-      qc.setQueryData(["mcp-status"], data);
-    },
+    onSuccess,
   });
-  const [copied, setCopied] = useState(false);
+  const setExposeLan = useMutation({
+    mutationFn: (expose: boolean) => api.mcp.setExposeLan(expose),
+    onSuccess,
+  });
+  const regenerateToken = useMutation({
+    mutationFn: () => api.mcp.regenerateToken(),
+    onSuccess,
+  });
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const modeOptions = useModeOptions();
 
-  const handleCopy = async (text: string) => {
+  const handleCopy = async (key: string, text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey((k) => (k === key ? null : k)), 1500);
     } catch (e) {
       console.error("clipboard write failed", e);
     }
@@ -57,6 +73,7 @@ export function McpSection() {
 
   const current = status?.mode ?? "off";
   const running = status?.running ?? false;
+  const exposeLan = status?.exposeLan ?? false;
 
   return (
     <section className="flex max-w-2xl flex-col gap-4 rounded-md border border-border bg-card/40 p-4">
@@ -121,20 +138,142 @@ export function McpSection() {
             type="button"
             size="sm"
             variant="ghost"
-            onClick={() => handleCopy(status.url)}
+            onClick={() => handleCopy("url", status.url)}
             aria-label={t("settings.mcp.copyEndpoint")}
           >
-            {copied ? <Check /> : <Copy />}
-            {t(copied ? "common.copied" : "common.copy")}
+            {copiedKey === "url" ? <Check /> : <Copy />}
+            {t(copiedKey === "url" ? "common.copied" : "common.copy")}
           </Button>
         </div>
       )}
 
-      {setMode.error && (
+      {/* LAN expose section — only meaningful when MCP is running. */}
+      {running && status && (
+        <div
+          className={cn(
+            "flex flex-col gap-3 rounded-md border p-3 transition-colors",
+            exposeLan ? "border-amber-500/40 bg-amber-500/5" : "border-border",
+          )}
+        >
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              checked={exposeLan}
+              onChange={(e) => setExposeLan.mutate(e.target.checked)}
+              disabled={setExposeLan.isPending}
+              className="mt-0.5 h-4 w-4 cursor-pointer accent-primary"
+            />
+            <div className="flex flex-1 flex-col gap-0.5">
+              <span className="flex items-center gap-1.5 text-sm font-medium">
+                <Globe size={14} className="text-muted-foreground" />
+                {t("settings.mcp.exposeLan")}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {t("settings.mcp.exposeLanDescription")}
+              </span>
+            </div>
+          </label>
+
+          {exposeLan && (
+            <>
+              <div className="flex items-start gap-2 rounded border border-amber-500/30 bg-amber-500/10 p-2 text-xs text-amber-200">
+                <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                <span>{t("settings.mcp.exposeLanWarning")}</span>
+              </div>
+
+              {status.lanUrl ? (
+                <LabeledCopyRow
+                  label={t("settings.mcp.lanUrlLabel")}
+                  value={status.lanUrl}
+                  copied={copiedKey === "lan-url"}
+                  onCopy={() => handleCopy("lan-url", status.lanUrl ?? "")}
+                  copyAria={t("settings.mcp.copyLanUrl")}
+                  t={t}
+                />
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  {t("settings.mcp.lanUrlUnknown")}
+                </p>
+              )}
+
+              <LabeledCopyRow
+                label={t("settings.mcp.tokenLabel")}
+                value={status.token}
+                icon={<KeyRound size={14} className="text-muted-foreground" />}
+                copied={copiedKey === "token"}
+                onCopy={() => handleCopy("token", status.token)}
+                copyAria={t("settings.mcp.copyToken")}
+                t={t}
+                trailingButton={
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => regenerateToken.mutate()}
+                    disabled={regenerateToken.isPending}
+                    aria-label={t("settings.mcp.regenerateToken")}
+                    title={t("settings.mcp.regenerateToken")}
+                  >
+                    <RefreshCcw />
+                  </Button>
+                }
+              />
+            </>
+          )}
+        </div>
+      )}
+
+      {(setMode.error || setExposeLan.error || regenerateToken.error) && (
         <p className="text-xs text-destructive">
-          {t("settings.mcp.failed")}: {String(setMode.error)}
+          {t("settings.mcp.failed")}:{" "}
+          {String(
+            setMode.error ?? setExposeLan.error ?? regenerateToken.error,
+          )}
         </p>
       )}
     </section>
+  );
+}
+
+function LabeledCopyRow({
+  label,
+  value,
+  icon,
+  copied,
+  onCopy,
+  copyAria,
+  trailingButton,
+  t,
+}: {
+  label: string;
+  value: string;
+  icon?: React.ReactNode;
+  copied: boolean;
+  onCopy: () => void;
+  copyAria: string;
+  trailingButton?: React.ReactNode;
+  t: (key: string) => string;
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+        {icon}
+        {label}
+      </span>
+      <div className="flex items-center gap-2 rounded border border-border bg-background px-3 py-2">
+        <code className="flex-1 break-all font-mono text-xs">{value}</code>
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          onClick={onCopy}
+          aria-label={copyAria}
+        >
+          {copied ? <Check /> : <Copy />}
+          {t(copied ? "common.copied" : "common.copy")}
+        </Button>
+        {trailingButton}
+      </div>
+    </div>
   );
 }
